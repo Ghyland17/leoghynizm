@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokasi - Safety Campaign</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKey"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🛡️ Safety Campaign</div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Beranda</a></li>
+                <li><a href="index.html#campaigns">Campaign</a></li>
+                <li><a href="maps.html" class="active">Lokasi</a></li>
+                <li><a href="admin-login.html" class="btn-admin">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Maps Section -->
+    <section class="maps-section">
+        <div class="container">
+            <h2>Lokasi Kota Kolaka</h2>
+            <div id="map" class="map-container"></div>
+            <div class="location-info">
+                <h3>Informasi Lokasi</h3>
+                <p><strong>Kota:</strong> Kolaka</p>
+                <p><strong>Provinsi:</strong> Sulawesi Tenggara</p>
+                <p><strong>Koordinat:</strong> -4.1583° S, 121.6269° E</p>
+                <p><strong>Alamat Kantor:</strong> Jl. Diponegoro No. 123, Kolaka, Sulawesi Tenggara</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Safety Campaign Kolaka. Semua hak dilindungi.</p>
+            <p>Hubungi: safety@kolaka.gov.id | Telepon: 0812-3456-7890</p>
+        </div>
+    </footer>
+
+    <script>
+        function initMap() {
+            const kolaka = { lat: -4.1583, lng: 121.6269 };
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: kolaka
+            });
+            new google.maps.Marker({
+                position: kolaka,
+                map: map,
+                title: 'Kota Kolaka'
+            });
+        }
+        window.addEventListener('load', initMap);
+    </script>
+</body>
+</html>

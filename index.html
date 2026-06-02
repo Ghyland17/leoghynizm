@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Campaign - Kolaka</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🛡️ Safety Campaign</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Beranda</a></li>
+                <li><a href="#campaigns">Campaign</a></li>
+                <li><a href="maps.html">Lokasi</a></li>
+                <li><a href="admin-login.html" class="btn-admin">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Safety Campaign Kota Kolaka</h1>
+            <p>Kampanye keselamatan kerja dan kesehatan untuk masyarakat Kolaka</p>
+            <button class="btn-primary" onclick="document.getElementById('campaigns').scrollIntoView({behavior: 'smooth'})">Lihat Campaign</button>
+        </div>
+    </section>
+
+    <!-- Campaigns Section -->
+    <section id="campaigns" class="campaigns">
+        <div class="container">
+            <h2>Campaign Terbaru</h2>
+            <div id="campaigns-list" class="campaigns-grid">
+                <!-- Campaigns will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Safety Campaign Kolaka. Semua hak dilindungi.</p>
+            <p>Hubungi: safety@kolaka.gov.id | Telepon: 0812-3456-7890</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Safety Campaign</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="admin-navbar">
+        <div class="container">
+            <div class="logo">🛡️ Admin Dashboard</div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Admin Dashboard -->
+    <section class="admin-dashboard">
+        <div class="container">
+            <div class="dashboard-content">
+                <!-- Sidebar -->
+                <aside class="admin-sidebar">
+                    <ul class="admin-menu">
+                        <li><a href="#" onclick="showSection('campaigns-list')" class="active">Daftar Campaign</a></li>
+                        <li><a href="#" onclick="showSection('add-campaign')">Tambah Campaign</a></li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="admin-main">
+                    <!-- Campaigns List -->
+                    <div id="campaigns-list" class="admin-section active">
+                        <h2>Daftar Campaign</h2>
+                        <div id="admin-campaigns-list" class="campaigns-table">
+                            <!-- Campaigns will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Add Campaign -->
+                    <div id="add-campaign" class="admin-section">
+                        <h2>Tambah Campaign Baru</h2>
+                        <form id="add-campaign-form" class="admin-form">
+                            <div class="form-group">
+                                <label for="title">Judul Campaign:</label>
+                                <input type="text" id="title" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Deskripsi:</label>
+                                <textarea id="description" name="description" rows="4" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="flyer">URL Flyer:</label>
+                                <input type="url" id="flyer" name="flyer" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="video">URL Video (YouTube):</label>
+                                <input type="url" id="video" name="video" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">Tanggal:</label>
+                                <input type="date" id="date" name="date" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Simpan Campaign</button>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
