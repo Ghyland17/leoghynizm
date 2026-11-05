@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.3 (Draft – keputusan FES atas pertanyaan form ERR) |
+| Versi dokumen | 0.4 (Draft – tambah format Preliminary Report) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -158,18 +158,43 @@ Daftar tahapan tambahan **bisa dikonfigurasi Admin** sesuai SOP FES dan jenis re
 
 ### 5.4 Preliminary Report Otomatis
 
-- Dibuat otomatis setelah tahapan **"Tiba di TKP"** dan data singkat kejadian terisi.
-- Isi minimal **[ASUMSI, sesuaikan dengan template Excel yang sekarang]**:
-  - Nomor kejadian (otomatis), tanggal & jam kejadian
-  - Jenis kejadian (kebakaran, rescue, medis, B3, false alarm, dan lain-lain)
-  - Lokasi (nama area + koordinat GPS + peta)
-  - Pelapor dan waktu laporan diterima
-  - Unit dan kru yang merespons
-  - Waktu berangkat, waktu tiba, jarak tempuh, response time
-  - Kondisi awal di TKP (singkat) dan korban/cedera (jika ada)
-  - 1–3 foto awal
-- Bisa dikirim (notifikasi + tautan/PDF) ke Supervisor dan daftar penerima yang ditentukan.
-- Ditandatangani digital oleh Team Leader sebelum dikirim.
+Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Preliminary_Report_Template.xlsx). Sheet *PRELIMINARY FORM* berisi form kosong dan sheet *CONTOH (Watalara)* berisi contoh pengisian dari data kejadian 31/10/2026.
+
+**Dasar format.** Belum ada satu format baku Preliminary Report. Format ini disusun dari tiga acuan:
+- pola laporan awal di regulator tambang dan dinas pemadam (laporan awal singkat dalam hitungan jam, lalu laporan final);
+- flash report ala *Incident Command System*, yaitu laporan berstatus *Initial / Update* yang informasinya boleh belum lengkap;
+- **gaya, istilah, dan daftar pilihan form ERR FES**, supaya Preliminary dan ERR terasa satu keluarga dan datanya bisa dipakai ulang.
+
+**Kapan dibuat & dikirim**
+- Draft dibuat otomatis saat tombol **"Arrival on scene"** ditekan. Team Leader cukup melengkapi size-up singkat, lalu mengirimnya.
+- Target terkirim **≤ 15 menit setelah tiba di TKP** **[ASUMSI, bisa diatur Admin]**.
+- Laporan bisa dikirim ulang sebagai **UPDATE 1, 2, 3…** bila situasi berubah (misalnya korban bertambah atau api terkendali). Setiap update menyimpan versi sebelumnya.
+- Nomor laporan **sama dengan nomor ERR** (format 5.5.2), sehingga Preliminary dan ERR satu kejadian saling terhubung.
+- Dikirim sebagai notifikasi + PDF ke daftar distribusi yang diatur Admin (default: Supervisor FES, ERT Coordinator, HSE Department, Manajemen Area). Sebelum dikirim, Team Leader menandatanganinya secara digital.
+
+**Isi form & sumber data** (Auto = otomatis, Master = pilih dari master data, Input = diisi petugas)
+
+| Bagian | Field | Sumber |
+|---|---|---|
+| Header | NO, REPORT STATUS (INITIAL/UPDATE n), DATE, TIME SENT | Auto |
+| | REGION, RESPONSE STATION | Master |
+| | LOCATION, GPS COORDINATE, Mileage (KM) | Input + Auto (GPS) |
+| | WEATHER / WIND | Input (pilihan cepat) |
+| A. Respon Time | Dispatch Call, Start to scene, Arrival on scene | Auto (tombol) |
+| | On Scene Time, **Total Response Time** (Dispatch s/d Arrival), Target Time | Auto (hitung) / Master |
+| B. Klasifikasi | RESPONSE TYPE, INCIDENT TYPE, SUB TYPE (daftar sama dengan ERR) | Input (pilih) |
+| | SITUATION CODE (Code Green / Yellow / Red) | Input (pilih) |
+| C. Informasi Awal | Informasi di Terima dari, Pelapor/Kontak, Detail Informasi | Input (diisi saat Dispatch Call) |
+| D. Kondisi Awal (Size-up) | Kondisi saat tiba, Potensi bahaya/eskalasi, Akses lokasi | Input (teks/suara) |
+| E. Korban (Sementara) | Meninggal, Luka Berat, Luka Ringan, Hilang/Terjebak, Dievakuasi, Triase G/Y/R/B, Total, Dirujuk ke | Input (angka) + Auto (total) |
+| F. Sumber Daya | Respon Vehicle, Personil On Duty, Medical Sup. | Auto (dari Dispatch) |
+| | Off Duty Recall / Support: nama/ID/instansi, kategori, **jam dipanggil, jam tiba** | Master + Auto (tombol) |
+| | Bantuan yang dibutuhkan | Input |
+| G. Tindakan & Rencana | Tindakan yang sudah dilakukan, Rencana berikutnya, Perkiraan update berikutnya, Status respons (On going / Under control / Selesai) | Input + Auto (dari kronologi) |
+| H. Foto Awal | 1–3 foto evidence pertama | Auto (dari galeri kejadian) |
+| Penutup | Distribusi, Reported by On Duty Leaders Operation, tanda tangan | Auto |
+
+**Hubungan dengan ERR.** Semua data Preliminary (waktu, klasifikasi, informasi, personel, korban) **otomatis terbawa ke draft ERR**, sehingga petugas tidak mengetik ulang. Di ERR, data korban Preliminary diperinci lagi menjadi Adult/Child/Infant × Male/Female dan Casualty Details.
 
 ### 5.5 ERR (Emergency Response Report) Otomatis
 
@@ -205,8 +230,8 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 | RESPON VEHICLE | FS R6, FS E8, EMS6, dll. | Master (pilih) | Unit kendaraan yang ikut respons; bisa lebih dari satu |
 | RESPON PERSONIL & NURSE (BN) | On Duty | Master (pilih) | Daftar ID karyawan (misalnya C041489) |
 | | Medical Sup. | Master (pilih) | Personel medis/nurse |
-| | Off Duty Recall | Master (pilih) | Personel off-duty yang dipanggil |
-| | Support from Nearest Station | Input/Master | Bantuan dari station lain atau instansi luar (misalnya **BPBD**) |
+| | Off Duty Recall | Master (pilih) + **Auto (jam)** | Personel off-duty yang dipanggil, beserta **jam dipanggil dan jam tiba** di TKP. Jam tiba dicatat lewat tombol "Tiba" per orang. Di ekspor Excel, jam tiba ditulis di kolom sebelah ID, dan otomatis juga masuk kronologi (`- 13:05 Off duty recall C0xxxxx tiba di TKP`) |
+| | Support from Nearest Station | Input/Master + **Auto (jam)** | Bantuan dari station lain atau instansi luar (misalnya **BPBD**), beserta **jam diminta dan jam tiba**. Juga otomatis masuk kronologi |
 | DESCRIPTION OF CASUALTIES | Casualty Numbers | Input (angka) | Adult / Child / Infant × Male / Female, plus centang *Mass casualty* |
 | | Total Casualties | Auto (hitung) | Jumlah seluruh korban |
 | | Casualty Details | Input (centang) | Employee, Contractor, Dependent Vale, Dependent Contractor, Community |
@@ -343,7 +368,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Incident** (Kejadian) | id, nomor_err (ESS/Pom/…), tanggal, region, lokasi, koordinat_tkp, response_station_id, response_type, incident_type, sub_type, info_diterima_dari, detail_informasi, status, dibuat_oleh |
 | **ResponseTime** | incident_id, dispatch_call, start_to_scene, arrival_on_scene, return_to_stn, on_scene_time, respond_time, target_time, time_gap, mileage_km |
 | **ResponseUnit** | id, incident_id, unit_kendaraan_id (R6/E8/EMS6…), team_leader_id |
-| **ResponsePersonnel** | incident_id, personel_id, kategori (on_duty / medical / off_duty_recall / support), instansi_pendukung |
+| **ResponsePersonnel** | incident_id, personel_id, kategori (on_duty / medical / off_duty_recall / support), instansi_pendukung, jam_dipanggil, jam_tiba |
+| **PreliminaryVersion** | incident_id, versi (INITIAL/UPDATE n), status_kode, size_up, korban_sementara, tindakan, rencana, status_respons, waktu_kirim, dikirim_oleh |
 | **Casualty** | incident_id, adult_m, adult_f, child_m, child_f, infant_m, infant_f, mass_casualty, total, detail (employee/contractor/dependent_vale/dependent_contractor/community), kondisi_triase (green/yellow/red/black) |
 | **IncidentDetail** | incident_id, fire_type, alarm_type, zone_address, fes_tag_number, mva_type, rescue_type, other_explain, chemical_name, hazchem_code, container_type, container_volume |
 | **ChronologyEntry** | id, incident_id, waktu, keterangan, sumber (tombol/catatan), dicatat_oleh |
@@ -435,7 +461,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 ## 13. Pertanyaan Terbuka
 
-1. ~~Template ERR~~ **sudah diterima** (`ERR_31-10-2026_Watalara.xlsx`, lihat 5.5.1). **Template Preliminary Report masih dibutuhkan**: field apa saja yang wajib dan dikirim ke siapa?
+1. ~~Template ERR & Preliminary~~ **Terjawab:** ERR dari `ERR_31-10-2026_Watalara.xlsx` (5.5.1); Preliminary dibuatkan baru (5.4, perlu review, lihat #17).
 2. Apa saja **tahapan respons resmi** menurut SOP FES PT Vale?
 3. Siapa saja yang **wajib menerima** Preliminary Report, dan berapa batas waktunya?
 4. Apakah petugas memakai **HP pribadi atau HP dinas**?
@@ -453,7 +479,9 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 13. ~~Target Time~~ **Terjawab:** ditentukan tim FES dan diatur di aplikasi. *Nilai awalnya masih perlu diisi FES sebelum rilis.*
 14. ~~Total Response Time~~ **Terjawab:** digabung ke blok RESPON TIME dengan keterangan "Dispatch Call s/d Arrival on scene".
 15. ~~Pola nomor ERR~~ **Terjawab:** format dibuat bisa diubah Admin (lihat 5.5.2).
-16. Untuk **Off Duty Recall** dan **Support from Nearest Station**, perlukah dicatat juga jam datang masing-masing?
+16. ~~Jam datang Off Duty Recall & Support~~ **Terjawab:** ya, dicatat (jam dipanggil + jam tiba) di Preliminary, ERR, dan kronologi.
+17. Mohon review **format Preliminary Report** (`templates/Preliminary_Report_Template.xlsx`). Apakah field, daftar distribusi, dan target waktu kirim ≤ 15 menit sudah sesuai?
+18. Apakah form ERR resmi boleh **ditambah kolom "Jam Tiba"** di bagian Off Duty Recall/Support, atau jam tiba cukup dicatat di kronologi?
 
 ---
 
