@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.2 (Draft – disesuaikan dengan format ERR Excel FES) |
+| Versi dokumen | 0.3 (Draft – keputusan FES atas pertanyaan form ERR) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -92,7 +92,7 @@ Saat ini tim Fire Emergency & Service (FES) PT Vale Indonesia membuat laporan re
 | US-03 | Team Leader | melihat jarak tempuh dan durasi berjalan di layar | saya tahu progres respons secara real time | Must |
 | US-04 | Petugas | mengambil foto evidence langsung dari aplikasi | foto otomatis tersimpan dengan waktu dan koordinat GPS | Must |
 | US-05 | Team Leader | mengisi data singkat kejadian (jenis, lokasi, korban) | Preliminary Report bisa langsung dibuat | Must |
-| US-06 | Team Leader | menekan **"Tutup Respons"** | respons resmi ditutup dan ERR draft dibuat otomatis | Must |
+| US-06 | Team Leader | menekan **"Leave Scene / Case Closed"** lalu **"Return to Stn"** saat tiba di fire station | respons resmi ditutup dan ERR draft dibuat otomatis | Must |
 | US-07 | Supervisor | menerima notifikasi saat Preliminary Report siap | saya bisa segera meneruskannya ke manajemen | Must |
 | US-08 | Supervisor | mereview, mengedit, dan menyetujui ERR | laporan final sesuai standar perusahaan | Must |
 | US-09 | Supervisor | mengekspor laporan ke PDF dan Excel | saya bisa mengirimnya sesuai format yang berlaku | Must |
@@ -122,8 +122,8 @@ Tombol **wajib** dipetakan langsung ke 4 kolom waktu di form ERR (blok *RESPON T
 | 4 | Size-up / Code (misalnya *code red*) | Tambahan | Kronologi | Waktu + kode situasi |
 | 5 | Mulai Pemadaman / Penanganan | Tambahan | Kronologi | Waktu + metode/peralatan (misalnya Jet Shooter) |
 | 6 | Api Terkendali / Padam / Reposisi / Dihentikan | Tambahan | Kronologi | Waktu + catatan singkat |
-| 7 | **Leave Scene / Case Closed** | Wajib | `Return to Stn` **[lihat Pertanyaan Terbuka #11]** | Waktu meninggalkan TKP, respons ditutup, **ERR draft dibuat** |
-| 8 | Tiba di Pos *(opsional)* | Tambahan | Kronologi | Waktu tiba kembali & jarak pulang |
+| 7 | Leave Scene / Case Closed | Tambahan | Kronologi | Waktu tim meninggalkan TKP ("Case closed"); pelacakan rute pulang dimulai |
+| 8 | **Return to Stn** (tiba di fire station) | Wajib | `Return to Stn` | Waktu tim **tiba kembali di fire station**, jarak pulang; respons resmi ditutup dan **ERR draft dibuat** |
 
 Selain tombol tahapan, ada tombol **"+ Catatan"** untuk menambahkan kejadian penting kapan saja, misalnya *"Api yang mengarah ke pesantren berhasil dipadamkan"*. Waktu catatan terisi otomatis, dan teksnya bisa diketik atau didiktekan dengan suara. Catatan ini menjadi baris kronologi ERR dengan format `- HH:MM <keterangan>`, sama seperti yang sekarang diketik manual.
 
@@ -173,7 +173,7 @@ Daftar tahapan tambahan **bisa dikonfigurasi Admin** sesuai SOP FES dan jenis re
 
 ### 5.5 ERR (Emergency Response Report) Otomatis
 
-- Draft ERR dibuat otomatis saat **"Tutup Respons"** ditekan.
+- Draft ERR dibuat otomatis saat **"Return to Stn"** ditekan (tim tiba kembali di fire station).
 - Seluruh data timeline, GPS, foto, kru, dan unit **terisi otomatis**.
 - Kolom yang perlu dilengkapi manual: kronologi, penyebab dugaan, tindakan yang dilakukan, peralatan/APAR/air yang digunakan, kerusakan, korban, rekomendasi, dan lesson learned.
 - **Alur persetujuan:** Draft → Diajukan (Team Leader) → Direview (Supervisor) → **Disetujui (Final)**. Laporan final terkunci dan hanya bisa direvisi dengan versi baru.
@@ -187,7 +187,7 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 
 | Bagian form | Field | Sumber | Keterangan |
 |---|---|---|---|
-| Header | NO | Auto | Nomor berurutan format `ESS/Pom/<urutan>/<bulan>/<tahun>` **[ASUMSI pola nomor, mohon konfirmasi]** |
+| Header | NO | Auto | Nomor otomatis dengan **format yang bisa diubah Admin** (lihat 5.5.2). Default: `ESS/Pom/{NNN}/{MM}/{YYYY}` |
 | | DATE | Auto | Tanggal kejadian (dari Dispatch Call) |
 | | REGION | Master | Default `SULAWESI TENGGARA, KOLAKA` |
 | | LOCATION | Input + Auto | Nama lokasi (misalnya *Desa Watalara*) + koordinat GPS TKP |
@@ -196,11 +196,12 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 | RESPON TIME | Dispatch Call | **Auto (tombol 1)** | |
 | | Start to scene | **Auto (tombol 2)** | |
 | | Arrival on scene | **Auto (tombol 3)** | |
-| | Return to Stn | **Auto (tombol 7)** | |
+| | Return to Stn | **Auto (tombol 8)** | Waktu tim tiba kembali di fire station |
 | | On Scene Time (Mnts) | Auto (hitung) | `Arrival on scene − Start to scene` (rumus sama dengan Excel; contoh 0:13) |
-| | Respond Time (Mnts) | Auto (hitung) | `Return to Stn − Arrival on scene` (contoh 1:17) |
-| | Target Time (Mnts) | Master | Target waktu tempuh per station/jenis respons **[perlu nilai dari FES]** |
-| | Time Gap (Mnts) | Auto (hitung) | Usulan: `On Scene Time − Target Time`. **Rumus di Excel sekarang merujuk sel kosong (J11/J12), jadi hasilnya selalu 0** (lihat Pertanyaan Terbuka #12) |
+| | Respond Time (Mnts) | Auto (hitung) | `Return to Stn − Arrival on scene`: lama di lokasi ditambah perjalanan pulang ke station |
+| | **Total Response Time (Mnts)** *(baris tambahan)* | Auto (hitung) | `Arrival on scene − Dispatch Call` (contoh 12:40 → 12:54 = 0:14). Ditampilkan menyatu dengan blok RESPON TIME dan diberi keterangan *"Dispatch Call s/d Arrival on scene"*. Dipakai sebagai KPI utama di dashboard |
+| | Target Time (Mnts) | Master | **Ditentukan tim FES** dan diatur Supervisor/Admin di aplikasi (per Response Station dan/atau jenis respons). Selama belum diisi, tampil 0:00 seperti di form sekarang |
+| | Time Gap (Mnts) | Tetap 0 | **Sesuai keputusan FES, nilai tetap 0** seperti form sekarang. Kolom tetap ada di ekspor supaya layout tidak berubah. Rumusnya bisa diaktifkan Admin nanti (usulan: `On Scene Time − Target Time`) |
 | RESPON VEHICLE | FS R6, FS E8, EMS6, dll. | Master (pilih) | Unit kendaraan yang ikut respons; bisa lebih dari satu |
 | RESPON PERSONIL & NURSE (BN) | On Duty | Master (pilih) | Daftar ID karyawan (misalnya C041489) |
 | | Medical Sup. | Master (pilih) | Personel medis/nurse |
@@ -228,11 +229,29 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 - Form di HP menampilkan **hanya bagian yang relevan** dengan jenis respons yang dipilih. Contohnya, untuk FIRE bagian MVA/RESCUE/HAZMAT disembunyikan. Hasil ekspor tetap memakai layout form lengkap.
 - Dengan pemetaan ini, **±60% isi ERR terisi otomatis** (header, seluruh waktu & durasi, mileage, unit, personel, kronologi, pelapor). Petugas cukup memilih jenis respons, mengisi korban, dan meninjau kronologi.
 
+#### 5.5.2 Format Nomor ERR (bisa diubah)
+
+Nomor ERR dibuat otomatis dari **template yang diatur Admin** di menu Pengaturan. Format tidak ditanam di kode, jadi bisa diganti kapan saja tanpa memperbarui aplikasi.
+
+| Token | Arti | Contoh |
+|---|---|---|
+| `{NNN}` | Nomor urut (jumlah `N` = jumlah digit, diisi nol di depan) | `007` |
+| `{MM}` / `{ROMAWI}` | Bulan angka / bulan Romawi | `10` / `X` |
+| `{YYYY}` / `{YY}` | Tahun | `2026` / `26` |
+| `{STATION}` | Kode Response Station | `FOX5` |
+| `{TYPE}` | Kode jenis respons | `FIRE` |
+| Teks bebas | Awalan/pemisah tetap | `ESS/Pom/` |
+
+- **Default:** `ESS/Pom/{NNN}/{MM}/{YYYY}` → `ESS/Pom/007/10/2026`.
+- **Reset nomor urut** bisa dipilih: per tahun (default), per bulan, atau tidak pernah reset.
+- Nomor dipesan di server saat ERR dibuat, supaya tidak ada nomor ganda walaupun beberapa HP membuat laporan bersamaan. Kalau dibuat saat offline, laporan memakai nomor sementara (`DRAFT-…`) dan menerima nomor resmi begitu tersinkron.
+- Perubahan format hanya berlaku untuk laporan baru. Nomor laporan lama tidak berubah, dan setiap perubahan format tercatat di log audit.
+
 ### 5.6 Dashboard & Arsip (Web)
 
 **Dashboard**
 - Jumlah kejadian per periode (harian, bulanan, tahunan) dan per jenis kejadian.
-- **Rata-rata response time** (laporan diterima → tiba di TKP) dan tren dari waktu ke waktu.
+- **Rata-rata Total Response Time** (Dispatch Call → Arrival on scene) dibandingkan dengan Target Time, beserta trennya dari waktu ke waktu.
 - Rata-rata durasi penanganan (tiba → padam → tutup).
 - Peta sebaran lokasi kejadian (heatmap).
 - Respons yang **sedang berjalan** (live) beserta posisi unit.
@@ -282,10 +301,10 @@ Panggilan darurat masuk (radio/telepon)
 [Tahapan tambahan & "+ Catatan"] → kronologi bertimestamp
         │      (code red, pemadaman, reposisi, dll.; foto evidence bisa kapan saja)
         ▼
-[LEAVE SCENE / CASE CLOSED] ── Return to Stn + Respond Time → ERR draft otomatis
+[LEAVE SCENE / CASE CLOSED] ── masuk kronologi, rute pulang mulai direkam
         │
         ▼
-[TIBA DI POS] (opsional)
+[RETURN TO STN] ── tiba di fire station + Respond Time → respons ditutup, ERR draft otomatis
 ```
 
 ### 6.2 Alur pelaporan (Web/Mobile)
@@ -429,11 +448,11 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 **Dari hasil review form ERR:**
 
-11. **"Return to Stn"** dicatat kapan: saat tim **meninggalkan TKP** (di contoh: 14:11 "tim meninggalkan lokasi kembali ke fire station. Case closed") atau saat tim **tiba kembali di station**? Ini menentukan arti "Respond Time".
-12. Rumus **Time Gap** di Excel saat ini merujuk sel kosong (J11/J12), sehingga hasilnya selalu 0. Apa definisi yang benar? Usulan: `On Scene Time − Target Time`.
-13. Berapa **Target Time** per Response Station atau per jenis respons?
-14. Label **"On Scene Time"** saat ini berisi *waktu tempuh* (Start → Arrival) dan **"Respond Time"** berisi *lama di lokasi* (Arrival → Return). Apakah definisi ini dipertahankan? Perlukah ditambah **"Total Response Time" dari Dispatch Call → Arrival** (di contoh 12:40 → 12:54 = 14 menit), yang umum dipakai sebagai KPI?
-15. Bagaimana **pola penomoran ERR** (`ESS/Pom/…`)? Apakah nomor diberikan oleh pihak lain atau berurutan per tahun?
+11. ~~Arti "Return to Stn"~~ **Terjawab:** waktu tim **tiba kembali di fire station**.
+12. ~~Definisi Time Gap~~ **Terjawab:** tetap 0 seperti form sekarang. Rumus bisa diaktifkan nanti.
+13. ~~Target Time~~ **Terjawab:** ditentukan tim FES dan diatur di aplikasi. *Nilai awalnya masih perlu diisi FES sebelum rilis.*
+14. ~~Total Response Time~~ **Terjawab:** digabung ke blok RESPON TIME dengan keterangan "Dispatch Call s/d Arrival on scene".
+15. ~~Pola nomor ERR~~ **Terjawab:** format dibuat bisa diubah Admin (lihat 5.5.2).
 16. Untuk **Off Duty Recall** dan **Support from Nearest Station**, perlukah dicatat juga jam datang masing-masing?
 
 ---
@@ -448,7 +467,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **TKP** | Tempat Kejadian Perkara (lokasi kejadian) |
 | **Dispatch Call / Start to scene / Arrival on scene / Return to Stn** | Empat titik waktu resmi pada form ERR |
 | **On Scene Time** | Istilah di form ERR untuk waktu tempuh: *Arrival on scene − Start to scene* |
-| **Respond Time** | Istilah di form ERR untuk lama penanganan: *Return to Stn − Arrival on scene* |
+| **Respond Time** | Istilah di form ERR: *Return to Stn − Arrival on scene* (di lokasi + perjalanan pulang) |
+| **Total Response Time** | *Arrival on scene − Dispatch Call*: KPI utama waktu respons |
 | **Mileage (KM)** | Jarak tempuh dari Response Station ke TKP |
 | **Triase (Green/Yellow/Red/Black)** | Kategori kondisi korban dari ringan sampai meninggal |
 | **BPBD** | Badan Penanggulangan Bencana Daerah |
