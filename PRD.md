@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.5 (Draft – kolom Jam Tiba di form ERR) |
+| Versi dokumen | 0.6 (Draft – Target Time diisi tim respons, HP pribadi) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -116,7 +116,7 @@ Tombol **wajib** dipetakan langsung ke 4 kolom waktu di form ERR (blok *RESPON T
 
 | # | Tahapan (Label tombol) | Jenis | Kolom ERR | Data yang tercatat otomatis |
 |---|---|---|---|---|
-| 1 | **Dispatch Call** (panggilan diterima) | Wajib | `Dispatch Call` | Waktu panggilan diterima, sumber info (*Informasi di Terima dari*, misalnya ERT Coordinator) |
+| 1 | **Dispatch Call** (panggilan diterima) | Wajib | `Dispatch Call` | Waktu panggilan diterima, sumber info (*Informasi di Terima dari*, misalnya ERT Coordinator). Tim respons juga **mengisi Target Time** untuk lokasi ini (wajib diisi sebelum tombol Start to scene aktif) |
 | 2 | **Start to Scene** (berangkat) | Wajib | `Start to scene` | Waktu berangkat, titik GPS awal, Response Station, unit & personel; **pelacakan rute dimulai** |
 | 3 | **Arrival on Scene** (tiba di TKP) | Wajib | `Arrival on scene` | Waktu tiba, titik GPS TKP, **jarak tempuh → `Mileage (KM)`**; pelacakan rute berhenti; **memicu Preliminary Report** |
 | 4 | Size-up / Code (misalnya *code red*) | Tambahan | Kronologi | Waktu + kode situasi |
@@ -167,7 +167,7 @@ Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Prelimi
 
 **Kapan dibuat & dikirim**
 - Draft dibuat otomatis saat tombol **"Arrival on scene"** ditekan. Team Leader cukup melengkapi size-up singkat, lalu mengirimnya.
-- Target terkirim **≤ 15 menit setelah tiba di TKP** **[ASUMSI, bisa diatur Admin]**.
+- Target terkirim **≤ 15 menit setelah tiba di TKP** (disetujui FES; bisa diatur Admin).
 - Laporan bisa dikirim ulang sebagai **UPDATE 1, 2, 3…** bila situasi berubah (misalnya korban bertambah atau api terkendali). Setiap update menyimpan versi sebelumnya.
 - Nomor laporan **sama dengan nomor ERR** (format 5.5.2), sehingga Preliminary dan ERR satu kejadian saling terhubung.
 - Dikirim sebagai notifikasi + PDF ke daftar distribusi yang diatur Admin (default: Supervisor FES, ERT Coordinator, HSE Department, Manajemen Area). Sebelum dikirim, Team Leader menandatanganinya secara digital.
@@ -181,7 +181,8 @@ Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Prelimi
 | | LOCATION, GPS COORDINATE, Mileage (KM) | Input + Auto (GPS) |
 | | WEATHER / WIND | Input (pilihan cepat) |
 | A. Respon Time | Dispatch Call, Start to scene, Arrival on scene | Auto (tombol) |
-| | On Scene Time, **Total Response Time** (Dispatch s/d Arrival), Target Time | Auto (hitung) / Master |
+| | On Scene Time, **Total Response Time** (Dispatch s/d Arrival) | Auto (hitung) |
+| | Target Time | Input (tim respons, saat Dispatch Call) |
 | B. Klasifikasi | RESPONSE TYPE, INCIDENT TYPE, SUB TYPE (daftar sama dengan ERR) | Input (pilih) |
 | | SITUATION CODE (Code Green / Yellow / Red) | Input (pilih) |
 | C. Informasi Awal | Informasi di Terima dari, Pelapor/Kontak, Detail Informasi | Input (diisi saat Dispatch Call) |
@@ -225,7 +226,7 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 | | On Scene Time (Mnts) | Auto (hitung) | `Arrival on scene − Start to scene` (rumus sama dengan Excel; contoh 0:13) |
 | | Respond Time (Mnts) | Auto (hitung) | `Return to Stn − Arrival on scene`: lama di lokasi ditambah perjalanan pulang ke station |
 | | **Total Response Time (Mnts)** *(baris tambahan)* | Auto (hitung) | `Arrival on scene − Dispatch Call` (contoh 12:40 → 12:54 = 0:14). Ditampilkan menyatu dengan blok RESPON TIME dan diberi keterangan *"Dispatch Call s/d Arrival on scene"*. Dipakai sebagai KPI utama di dashboard |
-| | Target Time (Mnts) | Master | **Ditentukan tim FES** dan diatur Supervisor/Admin di aplikasi (per Response Station dan/atau jenis respons). Selama belum diisi, tampil 0:00 seperti di form sekarang |
+| | Target Time (Mnts) | **Input** | **Diisi tim respons sebelum berangkat** (saat Dispatch Call), karena target berbeda-beda per lokasi. Tidak ada nilai default. Aplikasi bisa menampilkan target yang pernah dipakai untuk lokasi yang sama sebagai **saran**, tapi tim tetap yang menentukan. Perubahan setelah berangkat tercatat di log audit |
 | | Time Gap (Mnts) | Tetap 0 | **Sesuai keputusan FES, nilai tetap 0** seperti form sekarang. Kolom tetap ada di ekspor supaya layout tidak berubah. Rumusnya bisa diaktifkan Admin nanti (usulan: `On Scene Time − Target Time`) |
 | RESPON VEHICLE | FS R6, FS E8, EMS6, dll. | Master (pilih) | Unit kendaraan yang ikut respons; bisa lebih dari satu |
 | RESPON PERSONIL & NURSE (BN) | On Duty | Master (pilih) | Daftar ID karyawan (misalnya C041489) |
@@ -296,7 +297,7 @@ Nomor ERR dibuat otomatis dari **template yang diatur Admin** di menu Pengaturan
   - **Unit kendaraan**: FS R6, FS E8, EMS6, dan lainnya.
   - **Personel**: ID karyawan, nama, peran (On Duty / Medical / Off Duty).
   - **Instansi pendukung**: BPBD, Damkar setempat, dll.
-  - **Jenis respons, jenis insiden, dan sub-jenis** (FIRE/ALARM/MVA/RESCUE/HAZMAT), **Target Time**, tahapan respons tambahan, dan template laporan.
+  - **Jenis respons, jenis insiden, dan sub-jenis** (FIRE/ALARM/MVA/RESCUE/HAZMAT), tahapan respons tambahan, dan template laporan. (*Target Time tidak termasuk master data karena diisi per kejadian oleh tim respons.*)
 - Pengaturan daftar penerima notifikasi laporan.
 
 ### 5.8 Notifikasi
@@ -352,10 +353,11 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Kinerja** | Respons tombol < 300 ms; Preliminary Report terbentuk < 10 detik setelah data lengkap |
 | **Baterai** | Pelacakan GPS selama 1 jam respons menghabiskan < 15% baterai **[ASUMSI target]** |
 | **Keamanan** | Login per pengguna (bukan akun bersama); HTTPS/TLS; data terenkripsi; akses berbasis peran; sesi otomatis berakhir; dukungan SSO perusahaan **[jika tersedia]** |
+| **HP pribadi (BYOD)** | Petugas memakai **HP pribadi**, sehingga: (1) data aplikasi disimpan **terenkripsi di dalam aplikasi**, terpisah dari data pribadi; (2) foto evidence **tidak masuk ke galeri pribadi** dan dihapus dari HP setelah terunggah; (3) GPS **hanya aktif selama respons berjalan**, tanpa pelacakan di luar tugas; (4) Admin bisa **mencabut akses & menghapus data aplikasi dari jarak jauh** jika HP hilang atau anggota pindah tugas; (5) login dengan PIN/biometrik; (6) ukuran aplikasi kecil dan hemat kuota data (foto dikompresi; unggah foto asli bisa diatur hanya via Wi-Fi) |
 | **Integritas data** | Log audit untuk setiap perubahan data waktu dan laporan; laporan final tidak bisa diubah |
 | **Ketersediaan** | Uptime server ≥ 99,5%; backup database harian |
 | **Retensi data** | Arsip disimpan minimal 5 tahun **[ASUMSI, sesuaikan dengan kebijakan perusahaan]** |
-| **Kompatibilitas** | Android 9+ dan iOS 15+; browser Chrome, Edge, dan Safari versi terbaru |
+| **Kompatibilitas** | Android 9+ dan iOS 15+ (rentang luas karena HP pribadi beragam merek); berjalan baik di HP kelas menengah ke bawah (RAM 3 GB); browser Chrome, Edge, dan Safari versi terbaru |
 | **Bahasa** | Bahasa Indonesia (utama); Bahasa Inggris untuk ekspor laporan **[opsional]** |
 | **Kepatuhan** | Mengikuti kebijakan IT & keamanan data PT Vale Indonesia (termasuk lokasi server/hosting) |
 
@@ -451,7 +453,10 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 |---|---|---|
 | Sinyal internet lemah atau tidak ada di area tambang/hutan | Data tidak terkirim | Desain **offline-first** dengan sinkronisasi otomatis |
 | Petugas lupa menekan tombol saat situasi kritis | Data waktu tidak akurat | Tombol besar, pengingat getar/suara, koreksi oleh Team Leader dengan log audit, opsi **Bluetooth button** atau tombol di kendaraan (fase lanjut) |
-| HP rusak, basah, atau terlalu panas di lokasi kebakaran | Data hilang | Gunakan **HP rugged dinas**, sinkronisasi berkala, data tersimpan di server secepatnya |
+| HP pribadi rusak, basah, atau terlalu panas di lokasi kebakaran | Data hilang | Sinkronisasi sesering mungkin ke server; **dua anggota tim bisa mencatat di respons yang sama** (cadangan); sediakan pelindung tahan air/pouch HP **[usulan]** |
+| HP pribadi beragam merek, versi OS, dan kondisi | Aplikasi tidak berjalan sama di semua HP | Uji di berbagai HP anggota saat pilot, tetapkan spesifikasi minimum, fitur penghemat baterai |
+| Kekhawatiran privasi anggota karena GPS di HP pribadi | Anggota enggan memasang aplikasi | GPS hanya aktif saat respons, kebijakan privasi yang jelas, data pribadi tidak diakses |
+| Biaya kuota data & baterai ditanggung pribadi | Adopsi rendah | Pertimbangkan **tunjangan pulsa/kuota** dari perusahaan; foto besar diunggah via Wi-Fi station |
 | Baterai habis saat respons panjang | Pencatatan terhenti | Optimasi GPS, charger di kendaraan, peringatan baterai rendah |
 | Penolakan perubahan dari kebiasaan Excel | Adopsi rendah | Format laporan **mengikuti template lama**, pelatihan, masa pilot paralel |
 | Kebijakan keamanan data perusahaan | Penundaan rilis | Libatkan tim IT PT Vale sejak Fase 0 |
@@ -464,7 +469,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 1. ~~Template ERR & Preliminary~~ **Terjawab:** ERR dari `ERR_31-10-2026_Watalara.xlsx` (5.5.1); Preliminary dibuatkan baru (5.4, perlu review, lihat #17).
 2. Apa saja **tahapan respons resmi** menurut SOP FES PT Vale?
 3. Siapa saja yang **wajib menerima** Preliminary Report, dan berapa batas waktunya?
-4. Apakah petugas memakai **HP pribadi atau HP dinas**?
+4. ~~HP pribadi atau dinas~~ **Terjawab:** HP pribadi (lihat kebutuhan non-fungsional *HP pribadi (BYOD)* dan risiko di bagian 12).
 5. Apakah ada kebijakan **server on-premise** atau cloud tertentu yang wajib dipakai?
 6. Apakah tersedia **SSO/Active Directory** perusahaan untuk login?
 7. Apakah ada **peta digital area perusahaan** yang bisa dipakai?
@@ -476,11 +481,11 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 11. ~~Arti "Return to Stn"~~ **Terjawab:** waktu tim **tiba kembali di fire station**.
 12. ~~Definisi Time Gap~~ **Terjawab:** tetap 0 seperti form sekarang. Rumus bisa diaktifkan nanti.
-13. ~~Target Time~~ **Terjawab:** ditentukan tim FES dan diatur di aplikasi. *Nilai awalnya masih perlu diisi FES sebelum rilis.*
+13. ~~Target Time~~ **Terjawab:** tidak ada nilai default karena berbeda per lokasi. **Diisi tim respons saat Dispatch Call**, sebelum berangkat.
 14. ~~Total Response Time~~ **Terjawab:** digabung ke blok RESPON TIME dengan keterangan "Dispatch Call s/d Arrival on scene".
 15. ~~Pola nomor ERR~~ **Terjawab:** format dibuat bisa diubah Admin (lihat 5.5.2).
 16. ~~Jam datang Off Duty Recall & Support~~ **Terjawab:** ya, dicatat (jam dipanggil + jam tiba) di Preliminary, ERR, dan kronologi.
-17. Mohon review **format Preliminary Report** (`templates/Preliminary_Report_Template.xlsx`). Apakah field, daftar distribusi, dan target waktu kirim ≤ 15 menit sudah sesuai?
+17. ~~Review format Preliminary Report~~ **Terjawab:** format, daftar distribusi, dan target kirim ≤ 15 menit **disetujui**.
 18. ~~Kolom Jam Tiba di ERR~~ **Terjawab:** boleh ditambah. Lihat `templates/ERR_Form_Template.xlsx`.
 
 ---
