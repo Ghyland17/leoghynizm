@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.4 (Draft – tambah format Preliminary Report) |
+| Versi dokumen | 0.5 (Draft – kolom Jam Tiba di form ERR) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -206,7 +206,7 @@ Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Prelimi
 
 #### 5.5.1 Pemetaan field form ERR → sumber data aplikasi
 
-Acuan: file `ERR_31-10-2026_Watalara.xlsx` (sheet **ERR FORM** dan **DATA**).
+Acuan: file `ERR_31-10-2026_Watalara.xlsx` (sheet **ERR FORM** dan **DATA**). Form yang sudah disesuaikan, dengan tambahan kolom **Jam Tiba** untuk Off Duty Recall dan Support, ada di [`templates/ERR_Form_Template.xlsx`](templates/ERR_Form_Template.xlsx). Layout, checkbox, dropdown, dan rumusnya tetap sama dengan aslinya.
 
 Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipilih dari master data · **Input** = diisi petugas (pilihan cepat/teks).
 
@@ -230,8 +230,8 @@ Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipi
 | RESPON VEHICLE | FS R6, FS E8, EMS6, dll. | Master (pilih) | Unit kendaraan yang ikut respons; bisa lebih dari satu |
 | RESPON PERSONIL & NURSE (BN) | On Duty | Master (pilih) | Daftar ID karyawan (misalnya C041489) |
 | | Medical Sup. | Master (pilih) | Personel medis/nurse |
-| | Off Duty Recall | Master (pilih) + **Auto (jam)** | Personel off-duty yang dipanggil, beserta **jam dipanggil dan jam tiba** di TKP. Jam tiba dicatat lewat tombol "Tiba" per orang. Di ekspor Excel, jam tiba ditulis di kolom sebelah ID, dan otomatis juga masuk kronologi (`- 13:05 Off duty recall C0xxxxx tiba di TKP`) |
-| | Support from Nearest Station | Input/Master + **Auto (jam)** | Bantuan dari station lain atau instansi luar (misalnya **BPBD**), beserta **jam diminta dan jam tiba**. Juga otomatis masuk kronologi |
+| | Off Duty Recall | Master (pilih) + **Auto (jam)** | Personel off-duty yang dipanggil, beserta **jam dipanggil dan jam tiba** di TKP. Jam tiba dicatat lewat tombol "Tiba" per orang. Di form ERR, kolom pertama berisi ID dan kolom kedua **Jam Tiba** (header: *Off Duty Recall (ID \| Jam Tiba)*). Jam tiba juga otomatis masuk kronologi (`- 13:05 Off duty recall C0xxxxx tiba di TKP`) |
+| | Support from Nearest Station | Input/Master + **Auto (jam)** | Bantuan dari station lain atau instansi luar (misalnya **BPBD**), beserta **jam diminta dan jam tiba**. Di form ERR, kolomnya: *Instansi \| Ket. \| Jam Tiba*. Juga otomatis masuk kronologi |
 | DESCRIPTION OF CASUALTIES | Casualty Numbers | Input (angka) | Adult / Child / Infant × Male / Female, plus centang *Mass casualty* |
 | | Total Casualties | Auto (hitung) | Jumlah seluruh korban |
 | | Casualty Details | Input (centang) | Employee, Contractor, Dependent Vale, Dependent Contractor, Community |
@@ -481,7 +481,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 15. ~~Pola nomor ERR~~ **Terjawab:** format dibuat bisa diubah Admin (lihat 5.5.2).
 16. ~~Jam datang Off Duty Recall & Support~~ **Terjawab:** ya, dicatat (jam dipanggil + jam tiba) di Preliminary, ERR, dan kronologi.
 17. Mohon review **format Preliminary Report** (`templates/Preliminary_Report_Template.xlsx`). Apakah field, daftar distribusi, dan target waktu kirim ≤ 15 menit sudah sesuai?
-18. Apakah form ERR resmi boleh **ditambah kolom "Jam Tiba"** di bagian Off Duty Recall/Support, atau jam tiba cukup dicatat di kronologi?
+18. ~~Kolom Jam Tiba di ERR~~ **Terjawab:** boleh ditambah. Lihat `templates/ERR_Form_Template.xlsx`.
 
 ---
 
