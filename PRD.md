@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.1 (Draft) |
+| Versi dokumen | 0.2 (Draft – disesuaikan dengan format ERR Excel FES) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -112,19 +112,22 @@ Satu tombol besar di layar utama yang **berubah sesuai tahapan respons**. Setiap
 
 #### Tahapan respons
 
-| # | Tahapan (Label tombol) | Data yang tercatat otomatis |
-|---|---|---|
-| 0 | **Terima Panggilan** | Waktu laporan diterima, sumber laporan, pelapor *(input singkat)* |
-| 1 | **Mulai Respons / Berangkat** | Waktu berangkat, titik GPS awal (pos), unit dan kru yang ikut; **pelacakan rute dimulai** |
-| 2 | **Tiba di TKP** | Waktu tiba, titik GPS TKP, **jarak tempuh** (km), **waktu perjalanan**; pelacakan rute berhenti |
-| 3 | **Mulai Pemadaman / Penanganan** | Waktu mulai aksi |
-| 4 | **Api Terkendali (Under Control)** | Waktu terkendali |
-| 5 | **Api Padam (Extinguished)** | Waktu padam |
-| 6 | **Pendinginan / Overhaul Selesai** | Waktu selesai |
-| 7 | **Tutup Respons (Close)** | Waktu respons resmi ditutup, **memicu pembuatan ERR draft** |
-| 8 | **Kembali ke Pos** *(opsional)* | Waktu tiba kembali di pos dan jarak pulang |
+Tombol **wajib** dipetakan langsung ke 4 kolom waktu di form ERR (blok *RESPON TIME*). Tombol **tambahan** tidak punya kolom sendiri di ERR, tetapi otomatis menjadi baris kronologi bertimestamp di kolom *Detail Informasi*.
 
-**[ASUMSI]** Tahapan di atas mengikuti praktik umum respons kebakaran. Daftar tahapan **harus bisa dikonfigurasi Admin** supaya sesuai dengan SOP FES PT Vale. Jenis kejadian non-kebakaran (rescue, medis, tumpahan B3) bisa memiliki tahapan berbeda.
+| # | Tahapan (Label tombol) | Jenis | Kolom ERR | Data yang tercatat otomatis |
+|---|---|---|---|---|
+| 1 | **Dispatch Call** (panggilan diterima) | Wajib | `Dispatch Call` | Waktu panggilan diterima, sumber info (*Informasi di Terima dari*, misalnya ERT Coordinator) |
+| 2 | **Start to Scene** (berangkat) | Wajib | `Start to scene` | Waktu berangkat, titik GPS awal, Response Station, unit & personel; **pelacakan rute dimulai** |
+| 3 | **Arrival on Scene** (tiba di TKP) | Wajib | `Arrival on scene` | Waktu tiba, titik GPS TKP, **jarak tempuh → `Mileage (KM)`**; pelacakan rute berhenti; **memicu Preliminary Report** |
+| 4 | Size-up / Code (misalnya *code red*) | Tambahan | Kronologi | Waktu + kode situasi |
+| 5 | Mulai Pemadaman / Penanganan | Tambahan | Kronologi | Waktu + metode/peralatan (misalnya Jet Shooter) |
+| 6 | Api Terkendali / Padam / Reposisi / Dihentikan | Tambahan | Kronologi | Waktu + catatan singkat |
+| 7 | **Leave Scene / Case Closed** | Wajib | `Return to Stn` **[lihat Pertanyaan Terbuka #11]** | Waktu meninggalkan TKP, respons ditutup, **ERR draft dibuat** |
+| 8 | Tiba di Pos *(opsional)* | Tambahan | Kronologi | Waktu tiba kembali & jarak pulang |
+
+Selain tombol tahapan, ada tombol **"+ Catatan"** untuk menambahkan kejadian penting kapan saja, misalnya *"Api yang mengarah ke pesantren berhasil dipadamkan"*. Waktu catatan terisi otomatis, dan teksnya bisa diketik atau didiktekan dengan suara. Catatan ini menjadi baris kronologi ERR dengan format `- HH:MM <keterangan>`, sama seperti yang sekarang diketik manual.
+
+Daftar tahapan tambahan **bisa dikonfigurasi Admin** sesuai SOP FES dan jenis respons (FIRE, RESCUE, MVA, HAZMAT, dan lain-lain).
 
 #### Aturan & perilaku
 
@@ -174,8 +177,56 @@ Satu tombol besar di layar utama yang **berubah sesuai tahapan respons**. Setiap
 - Seluruh data timeline, GPS, foto, kru, dan unit **terisi otomatis**.
 - Kolom yang perlu dilengkapi manual: kronologi, penyebab dugaan, tindakan yang dilakukan, peralatan/APAR/air yang digunakan, kerusakan, korban, rekomendasi, dan lesson learned.
 - **Alur persetujuan:** Draft → Diajukan (Team Leader) → Direview (Supervisor) → **Disetujui (Final)**. Laporan final terkunci dan hanya bisa direvisi dengan versi baru.
-- Ekspor ke **PDF** (format resmi dengan logo) dan **Excel** (agar kompatibel dengan format lama).
-- **Template laporan mengikuti format Excel yang sekarang dipakai FES**, sehingga tidak mengubah kebiasaan pembaca laporan.
+- Ekspor ke **PDF** (format resmi dengan logo FES & Vale) dan **Excel** (file `.xlsx` yang **identik dengan form "ERR FORM" saat ini**). Nama file mengikuti pola yang sekarang dipakai: `ERR_<DD-MM-YYYY>_<Lokasi>.xlsx`, contoh `ERR_31-10-2026_Watalara.xlsx`.
+
+#### 5.5.1 Pemetaan field form ERR → sumber data aplikasi
+
+Acuan: file `ERR_31-10-2026_Watalara.xlsx` (sheet **ERR FORM** dan **DATA**).
+
+Keterangan sumber: **Auto** = terisi otomatis oleh aplikasi · **Master** = dipilih dari master data · **Input** = diisi petugas (pilihan cepat/teks).
+
+| Bagian form | Field | Sumber | Keterangan |
+|---|---|---|---|
+| Header | NO | Auto | Nomor berurutan format `ESS/Pom/<urutan>/<bulan>/<tahun>` **[ASUMSI pola nomor, mohon konfirmasi]** |
+| | DATE | Auto | Tanggal kejadian (dari Dispatch Call) |
+| | REGION | Master | Default `SULAWESI TENGGARA, KOLAKA` |
+| | LOCATION | Input + Auto | Nama lokasi (misalnya *Desa Watalara*) + koordinat GPS TKP |
+| | RESPONSE STATION | Master | FIRE STATION FAP FOX-5, FIRST AID STATION FOX-4, OPS. CAMP FOX-3, GROUND TRAINING DOJO, CONSTRUCTION OFFICE FOX-2, ON CALL, CO/MGH, NAR |
+| | Mileage (KM) | **Auto (GPS)** | Jarak rute aktual dari station ke TKP. Menggantikan tabel jarak manual di sheet DATA |
+| RESPON TIME | Dispatch Call | **Auto (tombol 1)** | |
+| | Start to scene | **Auto (tombol 2)** | |
+| | Arrival on scene | **Auto (tombol 3)** | |
+| | Return to Stn | **Auto (tombol 7)** | |
+| | On Scene Time (Mnts) | Auto (hitung) | `Arrival on scene − Start to scene` (rumus sama dengan Excel; contoh 0:13) |
+| | Respond Time (Mnts) | Auto (hitung) | `Return to Stn − Arrival on scene` (contoh 1:17) |
+| | Target Time (Mnts) | Master | Target waktu tempuh per station/jenis respons **[perlu nilai dari FES]** |
+| | Time Gap (Mnts) | Auto (hitung) | Usulan: `On Scene Time − Target Time`. **Rumus di Excel sekarang merujuk sel kosong (J11/J12), jadi hasilnya selalu 0** (lihat Pertanyaan Terbuka #12) |
+| RESPON VEHICLE | FS R6, FS E8, EMS6, dll. | Master (pilih) | Unit kendaraan yang ikut respons; bisa lebih dari satu |
+| RESPON PERSONIL & NURSE (BN) | On Duty | Master (pilih) | Daftar ID karyawan (misalnya C041489) |
+| | Medical Sup. | Master (pilih) | Personel medis/nurse |
+| | Off Duty Recall | Master (pilih) | Personel off-duty yang dipanggil |
+| | Support from Nearest Station | Input/Master | Bantuan dari station lain atau instansi luar (misalnya **BPBD**) |
+| DESCRIPTION OF CASUALTIES | Casualty Numbers | Input (angka) | Adult / Child / Infant × Male / Female, plus centang *Mass casualty* |
+| | Total Casualties | Auto (hitung) | Jumlah seluruh korban |
+| | Casualty Details | Input (centang) | Employee, Contractor, Dependent Vale, Dependent Contractor, Community |
+| | Casualty Conditions (triase) | Input (centang) | Green, Yellow, Red, Black |
+| Klasifikasi | RESPONSE TYPE | Input (pilih) | ALARM, FIRE, MVA (Motor Vehicle Accident), RESCUE, HAZMAT, OIL SPILL, PATIENT MOBILISATION (MEDICAL) |
+| | INCIDENT TYPE | Input (pilih) | INDUSTRIAL, NON INDUSTRIAL, MEDICAL |
+| Informasi | Informasi di Terima dari | Input (pilih) | Misalnya ERT Coordinator (diisi saat Dispatch Call) |
+| | Detail Informasi | Input | Ringkasan awal kejadian |
+| | Kronologi | **Auto** | Disusun otomatis dari tombol tahapan + "+ Catatan", format `- HH:MM keterangan`; bisa diedit sebelum diajukan |
+| Detail per jenis respons (hanya bagian yang sesuai jenis respons yang ditampilkan) | FIRE | Input (pilih) | Structural, Electrical, Equipment, Sulphur, Compressed Cylinder, Vehicle/Motor, House, Tank Farm, Wildland Fire; *Other Fire (Explain)* |
+| | ALARM | Input | Alarm detection / Trouble-False; Zone/Equipt. Address; FES Tag Number; Other Alarm Activation |
+| | MVA | Input (pilih) | Single Vehicle, Multi Vehicle, Vehicle VS Motorcycle, Other Vehicle, Single Motor, Motor VS Motor, Motor VS People; *Other MVA (Explain)* |
+| | RESCUE | Input (pilih) | Fire Search & Rescue, LSAR, Water Rescue, Confined Space, Trench, Vehicle Extrication, Vertical/Height, People Entrapment; *Other Rescue (Explain)* |
+| | HAZMAT / OIL SPILL | Input | Name of Chemical, HAZMAT Class/HAZCHEM Code, Type of Container, Volume of Container |
+| Penutup | Reported by On Duty Leaders Operation | Auto | Nama Team Leader yang login + tanda tangan digital |
+| | DATE | Auto | Tanggal pengajuan laporan |
+
+**Catatan desain:**
+- Semua daftar pilihan (dropdown) di atas diambil dari *data validation* Excel yang sekarang. Di aplikasi daftar ini menjadi **master data yang bisa diubah Admin**.
+- Form di HP menampilkan **hanya bagian yang relevan** dengan jenis respons yang dipilih. Contohnya, untuk FIRE bagian MVA/RESCUE/HAZMAT disembunyikan. Hasil ekspor tetap memakai layout form lengkap.
+- Dengan pemetaan ini, **±60% isi ERR terisi otomatis** (header, seluruh waktu & durasi, mileage, unit, personel, kronologi, pelapor). Petugas cukup memilih jenis respons, mengisi korban, dan meninjau kronologi.
 
 ### 5.6 Dashboard & Arsip (Web)
 
@@ -195,7 +246,13 @@ Satu tombol besar di layar utama yang **berubah sesuai tahapan respons**. Setiap
 ### 5.7 Manajemen Pengguna & Master Data (Web)
 
 - Akun pengguna dan peran (lihat bagian 3.1). Login memakai NIK/ID karyawan.
-- Master data: pos/stasiun, unit kendaraan, jenis kejadian, area/lokasi, tahapan respons, dan template laporan.
+- Master data:
+  - **Response Station**: FIRE STATION FAP FOX-5, FIRST AID STATION FOX-4, OPS. CAMP FOX-3, GROUND TRAINING DOJO, CONSTRUCTION OFFICE FOX-2, ON CALL, CO/MGH, NAR (beserta koordinat GPS masing-masing).
+  - **Lokasi/area umum**: Camp Tetenggala, Camp Manado, MCO, Main Gate, Dormi/FOX-4, Camp Pad PAMA, Ground Training/DOJO, Ops. Camp, Gate NAR, Construction Office CO, dan seterusnya (beserta koordinat).
+  - **Unit kendaraan**: FS R6, FS E8, EMS6, dan lainnya.
+  - **Personel**: ID karyawan, nama, peran (On Duty / Medical / Off Duty).
+  - **Instansi pendukung**: BPBD, Damkar setempat, dll.
+  - **Jenis respons, jenis insiden, dan sub-jenis** (FIRE/ALARM/MVA/RESCUE/HAZMAT), **Target Time**, tahapan respons tambahan, dan template laporan.
 - Pengaturan daftar penerima notifikasi laporan.
 
 ### 5.8 Notifikasi
@@ -213,22 +270,22 @@ Satu tombol besar di layar utama yang **berubah sesuai tahapan respons**. Setiap
 Panggilan darurat masuk (radio/telepon)
         │
         ▼
-[Team Leader buka aplikasi] → pilih jenis kejadian, lokasi, unit & kru
+[DISPATCH CALL]  ── waktu panggilan + sumber info (misalnya ERT Coordinator)
+        │            pilih Response Station, unit (R6/E8/EMS6) & personel
+        ▼
+[START TO SCENE] ── waktu berangkat + GPS awal, rute mulai direkam
         │
         ▼
-[MULAI RESPONS]  ── waktu berangkat + GPS awal, rute mulai direkam
-        │
-        ▼
-[TIBA DI TKP]    ── waktu tiba + jarak tempuh + durasi perjalanan
+[ARRIVAL ON SCENE] ── waktu tiba + Mileage (KM) otomatis + On Scene Time
         │                └─► Preliminary Report otomatis → notifikasi Supervisor
         ▼
-[MULAI PEMADAMAN] → [API TERKENDALI] → [API PADAM] → [OVERHAUL SELESAI]
-        │      (foto evidence bisa diambil kapan saja)
+[Tahapan tambahan & "+ Catatan"] → kronologi bertimestamp
+        │      (code red, pemadaman, reposisi, dll.; foto evidence bisa kapan saja)
         ▼
-[TUTUP RESPONS]  ── respons resmi ditutup → ERR draft otomatis
+[LEAVE SCENE / CASE CLOSED] ── Return to Stn + Respond Time → ERR draft otomatis
         │
         ▼
-[KEMBALI KE POS] (opsional)
+[TIBA DI POS] (opsional)
 ```
 
 ### 6.2 Alur pelaporan (Web/Mobile)
@@ -264,8 +321,13 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 | Entitas | Atribut utama |
 |---|---|
-| **Incident** (Kejadian) | id, nomor_kejadian, jenis, area, koordinat_tkp, pelapor, waktu_laporan, status, dibuat_oleh |
-| **ResponseUnit** | id, incident_id, unit_kendaraan_id, team_leader_id, daftar_kru |
+| **Incident** (Kejadian) | id, nomor_err (ESS/Pom/…), tanggal, region, lokasi, koordinat_tkp, response_station_id, response_type, incident_type, sub_type, info_diterima_dari, detail_informasi, status, dibuat_oleh |
+| **ResponseTime** | incident_id, dispatch_call, start_to_scene, arrival_on_scene, return_to_stn, on_scene_time, respond_time, target_time, time_gap, mileage_km |
+| **ResponseUnit** | id, incident_id, unit_kendaraan_id (R6/E8/EMS6…), team_leader_id |
+| **ResponsePersonnel** | incident_id, personel_id, kategori (on_duty / medical / off_duty_recall / support), instansi_pendukung |
+| **Casualty** | incident_id, adult_m, adult_f, child_m, child_f, infant_m, infant_f, mass_casualty, total, detail (employee/contractor/dependent_vale/dependent_contractor/community), kondisi_triase (green/yellow/red/black) |
+| **IncidentDetail** | incident_id, fire_type, alarm_type, zone_address, fes_tag_number, mva_type, rescue_type, other_explain, chemical_name, hazchem_code, container_type, container_volume |
+| **ChronologyEntry** | id, incident_id, waktu, keterangan, sumber (tombol/catatan), dicatat_oleh |
 | **TimelineEvent** | id, response_unit_id, tahapan, timestamp, lat, lng, akurasi_gps, sumber_waktu (server/perangkat), dicatat_oleh |
 | **GpsTrack** | id, response_unit_id, daftar titik (lat, lng, timestamp), jarak_total_km |
 | **Evidence** (Foto) | id, incident_id, tahapan, file_url, lat, lng, timestamp, keterangan, diambil_oleh |
@@ -354,7 +416,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 ## 13. Pertanyaan Terbuka
 
-1. Seperti apa **template Excel Preliminary Report dan ERR** yang dipakai saat ini? (sangat dibutuhkan untuk Fase 0)
+1. ~~Template ERR~~ **sudah diterima** (`ERR_31-10-2026_Watalara.xlsx`, lihat 5.5.1). **Template Preliminary Report masih dibutuhkan**: field apa saja yang wajib dan dikirim ke siapa?
 2. Apa saja **tahapan respons resmi** menurut SOP FES PT Vale?
 3. Siapa saja yang **wajib menerima** Preliminary Report, dan berapa batas waktunya?
 4. Apakah petugas memakai **HP pribadi atau HP dinas**?
@@ -364,6 +426,15 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 8. Berapa jumlah anggota FES, pos, dan unit kendaraan yang akan memakai aplikasi?
 9. Selain kebakaran, jenis kejadian apa saja yang ditangani (rescue, medis, B3, dan lain-lain)?
 10. Berapa lama data harus disimpan menurut kebijakan perusahaan?
+
+**Dari hasil review form ERR:**
+
+11. **"Return to Stn"** dicatat kapan: saat tim **meninggalkan TKP** (di contoh: 14:11 "tim meninggalkan lokasi kembali ke fire station. Case closed") atau saat tim **tiba kembali di station**? Ini menentukan arti "Respond Time".
+12. Rumus **Time Gap** di Excel saat ini merujuk sel kosong (J11/J12), sehingga hasilnya selalu 0. Apa definisi yang benar? Usulan: `On Scene Time − Target Time`.
+13. Berapa **Target Time** per Response Station atau per jenis respons?
+14. Label **"On Scene Time"** saat ini berisi *waktu tempuh* (Start → Arrival) dan **"Respond Time"** berisi *lama di lokasi* (Arrival → Return). Apakah definisi ini dipertahankan? Perlukah ditambah **"Total Response Time" dari Dispatch Call → Arrival** (di contoh 12:40 → 12:54 = 14 menit), yang umum dipakai sebagai KPI?
+15. Bagaimana **pola penomoran ERR** (`ESS/Pom/…`)? Apakah nomor diberikan oleh pihak lain atau berurutan per tahun?
+16. Untuk **Off Duty Recall** dan **Support from Nearest Station**, perlukah dicatat juga jam datang masing-masing?
 
 ---
 
@@ -375,7 +446,12 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **ERR** | Emergency Response Report: laporan lengkap respons darurat |
 | **Preliminary Report** | Laporan awal kejadian yang dikirim segera |
 | **TKP** | Tempat Kejadian Perkara (lokasi kejadian) |
-| **Response time** | Selisih waktu antara laporan diterima dan tim tiba di TKP |
+| **Dispatch Call / Start to scene / Arrival on scene / Return to Stn** | Empat titik waktu resmi pada form ERR |
+| **On Scene Time** | Istilah di form ERR untuk waktu tempuh: *Arrival on scene − Start to scene* |
+| **Respond Time** | Istilah di form ERR untuk lama penanganan: *Return to Stn − Arrival on scene* |
+| **Mileage (KM)** | Jarak tempuh dari Response Station ke TKP |
+| **Triase (Green/Yellow/Red/Black)** | Kategori kondisi korban dari ringan sampai meninggal |
+| **BPBD** | Badan Penanggulangan Bencana Daerah |
 | **Overhaul** | Tahap pendinginan dan pemeriksaan sisa api setelah padam |
 | **Offline-first** | Aplikasi tetap berfungsi tanpa internet dan menyinkronkan data saat online |
 | **MVP** | Minimum Viable Product: versi pertama dengan fitur inti |
