@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.9 (Draft – dashboard per jenis respons) |
+| Versi dokumen | 1.0 (Draft – simplicity, consistency, notifikasi tunggal, responsif tablet & landscape) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -284,7 +284,8 @@ Dashboard memakai klasifikasi yang sama dengan form ERR:
 
 **Filter global** (satu baris di atas, berlaku untuk semua angka dan grafik)
 - Periode: 30 hari, 3 bulan, 12 bulan, atau rentang tanggal sendiri.
-- Response Type: Semua atau salah satu jenis. Klik jenis di tabel atau grafik juga mengaktifkan filter ini (*drill-down*).
+- Response Type: dropdown dengan ikon per jenis (lonceng ALARM, api FIRE, mobil MVA, pelampung RESCUE, tabung kimia HAZMAT, tetesan OIL SPILL, palang medis MEDICAL) dan jumlah respons tiap jenis. Klik jenis di tabel atau grafik juga mengaktifkan filter ini (*drill-down*).
+- Filter lanjutan (station, incident type), **unduh data**, dan **info data** disimpan di menu **Opsi** yang bisa dibuka dan ditutup, supaya bagian atas dashboard tetap ringkas dan tidak menutupi isi. Tombol Opsi menampilkan jumlah filter lanjutan yang aktif.
 - Response Station dan Incident Type.
 
 **Ringkasan (KPI) sesuai filter**
@@ -318,7 +319,7 @@ Dashboard memakai klasifikasi yang sama dengan form ERR:
 - **Respons yang sedang berjalan** (live): tahap saat ini, waktu berjalan, dan posisi unit.
 - Status laporan: Draft / Menunggu review / Final, beserta Preliminary yang terlambat dikirim (> 15 menit).
 - Setiap grafik punya tooltip saat disorot. Tabel per jenis menjadi tampilan tabel dari grafik (aksesibilitas).
-- Ekspor rekap per jenis respons ke Excel dan PDF.
+- Ekspor dari menu Opsi: rekap per jenis respons (Excel), laporan dashboard (PDF), dan data mentah (CSV), semuanya sesuai filter aktif.
 - Tampilan mengikuti identitas visual 7A (glassmorphism, fade).
 
 **Warna per jenis respons** (tetap di semua grafik, tidak berubah saat difilter)
@@ -359,7 +360,12 @@ Merah logo tidak dipakai untuk jenis respons. Merah khusus untuk tombol aksi dan
 
 ### 5.9 Umpan Balik & Notifikasi di Aplikasi
 
-Setiap tindakan petugas langsung dibalas dengan notifikasi singkat di bagian atas layar. Notifikasi muncul dan hilang dengan animasi fade, maksimal 3 tampil bersamaan, dan hilang otomatis setelah ±3,5 detik.
+Setiap tindakan petugas langsung dibalas dengan notifikasi singkat. Di ponsel notifikasi muncul di bagian atas layar. Di tablet dan landscape notifikasi muncul di pojok bawah supaya tidak menutupi tombol aksi. Notifikasi muncul dan hilang dengan animasi fade dan hilang otomatis setelah ±3,5 detik.
+
+**Aturan tampil (tidak menumpuk)**
+- **Hanya satu notifikasi tampil dalam satu waktu.** Tindakan yang dilakukan berdekatan tidak menumpuk: notifikasi baru langsung menggantikan yang lama.
+- Pengecualian: notifikasi tahapan yang berisi tombol **Batalkan** tidak tergeser oleh notifikasi info ringan (misalnya memilih chip), supaya kesempatan membatalkan tidak hilang.
+- **Bisa ditutup kapan saja tanpa menunggu waktunya habis:** geser ke kiri atau ke kanan, geser ke atas atau ke bawah, tekan ×, atau tombol Esc di keyboard.
 
 | Jenis | Warna | Contoh |
 |---|---|---|
@@ -371,6 +377,7 @@ Setiap tindakan petugas langsung dibalas dengan notifikasi singkat di bagian ata
 - Notifikasi tombol tahapan (Start, Arrival, Leave, Return) memuat tombol **Batalkan** dengan hitungan mundur 10 detik (lihat 5.1).
 - Tombol yang belum bisa dipakai tetap bisa ditekan, lalu menampilkan peringatan berisi data yang masih kurang. Jadi tombol tidak sekadar mati tanpa penjelasan.
 - Notifikasi dibacakan pembaca layar (aksesibilitas).
+- Aturan yang sama berlaku di dashboard web (notifikasi di pojok kanan bawah).
 
 ### 5.10 Mode Fokus (Layar Diam)
 
@@ -454,6 +461,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Ketersediaan** | Uptime server ≥ 99,5%; backup database harian |
 | **Retensi data** | Arsip disimpan minimal 5 tahun **[ASUMSI, sesuaikan dengan kebijakan perusahaan]** |
 | **Kompatibilitas** | Android 9+ dan iOS 15+ (rentang luas karena HP pribadi beragam merek); berjalan baik di HP kelas menengah ke bawah (RAM 3 GB); browser Chrome, Edge, dan Safari versi terbaru |
+| **Responsif** | Satu aplikasi menyesuaikan diri ke **ponsel (portrait)**, **ponsel landscape**, serta **tablet/iPad** portrait dan landscape. Di layar lebar (tablet atau landscape), layar dibagi dua: kiri berisi status, timeline, metrik, dan peta; kanan berisi tombol aksi, tombol cepat, Preliminary, dan kronologi. Di landscape ponsel, tombol aksi dibuat lebih pendek supaya muat tanpa menggulir. Mode fokus menempatkan panel data di sisi kiri peta. Dashboard web menyesuaikan jumlah kolom untuk desktop, tablet, dan ponsel. |
 | **Bahasa** | Bahasa Indonesia (utama); Bahasa Inggris untuk ekspor laporan **[opsional]** |
 | **Kepatuhan** | Mengikuti kebijakan IT & keamanan data PT Vale Indonesia (termasuk lokasi server/hosting) |
 
@@ -469,6 +477,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Tipografi** | Barlow Condensed (judul & label tombol besar), Barlow (teks), JetBrains Mono (jam & angka). |
 | **Mode malam** | Warna yang sama dengan latar gelap untuk respons malam hari; mengikuti pengaturan HP. |
 | **Gaya desain** | **Glassmorphism**: panel kaca buram semi-transparan dengan tepi terang dan bayangan halus, di atas latar bercahaya lembut dari warna logo (navy, merah, kuning). Tombol aksi respons tetap **padat (tidak transparan)** supaya terbaca di bawah matahari dan mudah ditekan dengan sarung tangan. |
+| **Prinsip: Simplicity** | Satu layar, satu tugas utama. Hanya informasi yang dibutuhkan saat itu yang tampil (misalnya kronologi terbaru cukup 2 entri, lengkapnya di "Lihat semua"). Pilihan tambahan disimpan di lembar/menu (Catatan, Opsi) dan tidak ditampilkan dobel. Latar dibuat tenang. |
+| **Prinsip: Consistency** | Skala yang sama dipakai di mobile dan web: radius 12 px (kontrol), 18 px (kartu), 22 px (tombol aksi), dan bentuk pill untuk status. Jarak antar elemen 16 px, padding kartu 16 px. Gaya label, ikon garis, warna fungsi (kuning = isian tim, biru = hitungan sistem), dan perilaku notifikasi sama di semua layar. |
 | **Animasi** | Fade in/fade out untuk perpindahan layar, lembar (sheet), notifikasi, dan mode fokus. Durasi 0,15–0,7 detik dengan kurva halus. Dimatikan otomatis bila pengaturan HP mengurangi gerakan. |
 
 ## 8. Model Data (Garis Besar)
