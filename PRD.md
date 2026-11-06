@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.7 (Draft – identitas visual & logo FES PT Vale) |
+| Versi dokumen | 0.8 (Draft – mode fokus, notifikasi, glassmorphism & animasi) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -101,6 +101,8 @@ Saat ini tim Fire Emergency & Service (FES) PT Vale Indonesia membuat laporan re
 | US-12 | Petugas | tetap bisa mencatat tahapan saat sinyal hilang | data tidak hilang ketika berada di area tanpa sinyal | Must |
 | US-13 | Supervisor | melihat posisi tim yang sedang respons di peta | saya bisa memantau tanpa harus berada di lapangan | Should |
 | US-14 | Admin | mengelola akun petugas, unit kendaraan, dan pos | master data selalu terbarui | Must |
+| US-15 | Team Leader | layar otomatis menampilkan peta penuh dan data respons inti saat HP tidak disentuh | progres respons terbaca sekilas tanpa membuka menu, misalnya saat HP terpasang di dashboard kendaraan | Should |
+| US-16 | Petugas | mendapat notifikasi singkat setiap kali menekan tombol atau menyimpan data | yakin tindakan sudah tercatat, atau tahu apa yang perlu diperbaiki | Must |
 
 ---
 
@@ -305,6 +307,50 @@ Nomor ERR dibuat otomatis dari **template yang diatur Admin** di menu Pengaturan
 - Push notification ke Supervisor saat: respons dimulai, tim tiba di TKP, Preliminary Report siap, respons ditutup, dan ERR menunggu review.
 - **[Fase 2]** Notifikasi melalui email/WhatsApp ke manajemen.
 
+### 5.9 Umpan Balik & Notifikasi di Aplikasi
+
+Setiap tindakan petugas langsung dibalas dengan notifikasi singkat di bagian atas layar. Notifikasi muncul dan hilang dengan animasi fade, maksimal 3 tampil bersamaan, dan hilang otomatis setelah ±3,5 detik.
+
+| Jenis | Warna | Contoh |
+|---|---|---|
+| Berhasil | Hijau | Tombol tahapan tercatat, catatan/foto tersimpan, personel tiba, Preliminary terkirim, ERR diajukan |
+| Info | Navy | Memilih/menghapus pilihan, mengubah isian, mengubah jumlah korban/triase |
+| Peringatan | Oranye | Data wajib belum lengkap (disebutkan apa yang kurang), catatan kosong, masih ada respons aktif, data tersimpan saat tanpa sinyal |
+| Gagal | Merah | Proses gagal dan cara memperbaikinya |
+
+- Notifikasi tombol tahapan (Start, Arrival, Leave, Return) memuat tombol **Batalkan** dengan hitungan mundur 10 detik (lihat 5.1).
+- Tombol yang belum bisa dipakai tetap bisa ditekan, lalu menampilkan peringatan berisi data yang masih kurang. Jadi tombol tidak sekadar mati tanpa penjelasan.
+- Notifikasi dibacakan pembaca layar (aksesibilitas).
+
+### 5.10 Mode Fokus (Layar Diam)
+
+Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode fokus**: peta jadi layar penuh dan data respons inti tampil ringkas di atasnya.
+
+**Kapan aktif**
+- Hanya di layar Respons aktif, saat tahap *perjalanan ke TKP*, *di TKP*, atau *perjalanan pulang*.
+- Setelah layar tidak disentuh selama **15–20 detik** (default 15 detik, bisa diatur Admin; prototipe memakai 8 detik).
+- Tidak aktif saat petugas sedang mengetik atau lembar Catatan/Kronologi terbuka.
+- 2 detik setelah layar diam, garis tipis di bawah layar mulai berjalan sebagai tanda mode fokus akan aktif.
+
+**Isi tampilan**
+- **Peta layar penuh:** rute dari station ke TKP, posisi unit yang bergerak sesuai GPS, titik TKP yang berdenyut, dan aliran di sepanjang rute.
+- **Panel atas:** logo, status tahap (Menuju TKP / Di TKP / Kembali ke station), jam, stopwatch besar, nomor ERR, lokasi, unit.
+- **Tiga angka ringkas sesuai tahap:**
+  - Perjalanan: jarak, perkiraan tiba, status Target Time.
+  - Di TKP: On Scene Time, Total Response Time, status Preliminary.
+  - Pulang: jarak pulang, On Scene Time, lama di lokasi.
+- **Panel bawah:** garis 4 tahapan ERR, tahap berikutnya (ditulis besar), kronologi terakhir, dan tulisan "Sentuh layar untuk kembali".
+
+**Animasi**
+- Masuk: peta membesar dari posisinya di layar sampai memenuhi layar, tampilan di belakangnya mengecil dan buram, lalu panel data muncul bertahap dengan fade.
+- Keluar: sentuh di mana saja. Panel memudar, peta mengecil kembali ke posisinya, dan tampilan normal muncul lagi dengan halus.
+- Durasi transisi ±0,7 detik. Animasi dimatikan otomatis bila HP diatur untuk mengurangi gerakan.
+
+**Aturan keamanan**
+- Sentuhan pertama di mode fokus **hanya untuk keluar**. Sentuhan itu tidak pernah menekan tombol tahapan di bawahnya, sehingga tidak ada waktu yang tercatat tanpa sengaja.
+- Selama mode fokus, aplikasi menjaga layar tetap menyala (*screen wake lock*) bila HP mengizinkan. Ini perlu diimbangi pengaturan kecerahan supaya baterai tetap hemat (lihat kebutuhan Baterai).
+- Data di mode fokus diperbarui setiap detik dan tetap berjalan saat tanpa sinyal, karena GPS dan timer berjalan di HP.
+
 ---
 
 ## 6. Alur Pengguna (User Flow)
@@ -372,6 +418,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Warna fungsi** | Kuning `#FFD43B` = data diisi tim, biru `#CFE2F3` = dihitung sistem (mengikuti konvensi form ERR); hijau/oranye = status sesuai/lewat target. |
 | **Tipografi** | Barlow Condensed (judul & label tombol besar), Barlow (teks), JetBrains Mono (jam & angka). |
 | **Mode malam** | Warna yang sama dengan latar gelap untuk respons malam hari; mengikuti pengaturan HP. |
+| **Gaya desain** | **Glassmorphism**: panel kaca buram semi-transparan dengan tepi terang dan bayangan halus, di atas latar bercahaya lembut dari warna logo (navy, merah, kuning). Tombol aksi respons tetap **padat (tidak transparan)** supaya terbaca di bawah matahari dan mudah ditekan dengan sarung tangan. |
+| **Animasi** | Fade in/fade out untuk perpindahan layar, lembar (sheet), notifikasi, dan mode fokus. Durasi 0,15–0,7 detik dengan kurva halus. Dimatikan otomatis bila pengaturan HP mengurangi gerakan. |
 
 ## 8. Model Data (Garis Besar)
 
