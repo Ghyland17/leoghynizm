@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.0 (Draft – simplicity, consistency, notifikasi tunggal, responsif tablet & landscape) |
+| Versi dokumen | 1.1 (Draft – alur akun, peran & halaman admin, roadmap) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -59,13 +59,18 @@ Saat ini tim Fire Emergency & Service (FES) PT Vale Indonesia membuat laporan re
 
 ### 3.1 Peran pengguna
 
-| Peran | Deskripsi | Platform utama |
-|---|---|---|
-| **Petugas / Crew FES** | Anggota tim respons yang turun ke lapangan | Mobile |
-| **Team Leader / Komandan Regu** | Memimpin respons, menekan tombol tahapan, dan menyetujui laporan dari lapangan | Mobile |
-| **Supervisor / Koordinator FES** | Memeriksa, melengkapi, dan menyetujui laporan akhir (ERR) | Web + Mobile |
-| **Admin Sistem** | Mengelola akun, unit kendaraan, pos, dan master data | Web |
-| **Manajemen / Viewer** | Melihat dashboard dan arsip (hanya baca) | Web |
+| Peran | Siapa (usulan) | Yang bisa dilakukan | Platform |
+|---|---|---|---|
+| **Crew FES** | Anggota regu | Mencatat tahapan saat ditunjuk, foto, catatan, menandai personel tiba | Mobile |
+| **Team Leader** | Komandan regu yang bertugas | Semua hak Crew + Dispatch Call, mengisi Target Time, mengirim Preliminary, mengajukan ERR | Mobile |
+| **Supervisor** | Supervisor / Koordinator FES | Memantau respons live, mereview dan **menyetujui ERR**, melihat dashboard | Web + Mobile |
+| **Admin FES** | **Koordinator atau Superintendent FES**, dibantu 1 staf admin FES sebagai cadangan | Mengelola anggota, regu & jadwal jaga, master data, template, aturan respons, penerima laporan | Web |
+| **Super Admin** | **Tim IT PT Vale** (1–2 orang) | Pengaturan sistem: keamanan, SSO, retensi data, backup, hak Admin FES. Tidak mengurus data respons sehari-hari | Web |
+| **Viewer** | Manajemen, HSE | Melihat dashboard dan arsip (hanya baca) | Web |
+
+**[USULAN, mohon konfirmasi]** Admin FES dipegang pemilik proses (FES), bukan IT, supaya perubahan anggota dan master data tidak menunggu tiket IT. IT cukup sebagai Super Admin.
+
+Satu orang bisa punya lebih dari satu peran (misalnya Supervisor sekaligus Admin FES). Hak akses mengikuti gabungan perannya.
 
 ### 3.2 Persona
 
@@ -408,9 +413,97 @@ Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode 
 - Selama mode fokus, aplikasi menjaga layar tetap menyala (*screen wake lock*) bila HP mengizinkan. Ini perlu diimbangi pengaturan kecerahan supaya baterai tetap hemat (lihat kebutuhan Baterai).
 - Data di mode fokus diperbarui setiap detik dan tetap berjalan saat tanpa sinyal, karena GPS dan timer berjalan di HP.
 
+### 5.11 Akun & Aktivasi (tidak ada pendaftaran bebas)
+
+Anggota FES **tidak mendaftar sendiri**. Akun dibuat oleh Admin FES, lalu anggota mengaktifkannya di HP masing-masing. Alasannya:
+- Data respons adalah data perusahaan, sedangkan aplikasi dipasang di **HP pribadi**. Hanya orang yang benar-benar anggota FES yang boleh masuk.
+- Peran (Crew, Team Leader, Supervisor) harus ditentukan atasan, bukan dipilih sendiri.
+- Kalau anggota pindah atau keluar, aksesnya bisa dicabut di satu tempat.
+
+**Alur aktivasi akun**
+
+```mermaid
+flowchart LR
+  A[Admin FES menambah anggota<br/>satu per satu atau impor Excel] --> B[Sistem kirim kode aktivasi<br/>via WhatsApp/SMS/email]
+  B --> C[Anggota pasang aplikasi<br/>& masukkan ID karyawan + kode]
+  C --> D[Verifikasi OTP<br/>ke nomor HP terdaftar]
+  D --> E[Buat PIN 6 digit<br/>+ aktifkan sidik jari/wajah]
+  E --> F[Setujui kebijakan privasi<br/>& izin lokasi, kamera, notifikasi]
+  F --> G[Tur singkat 1 menit<br/>lalu siap dipakai]
+```
+
+1. **Admin FES menambah anggota**: ID karyawan, nama, nomor HP, regu, station, dan peran. Bisa satu per satu atau impor dari Excel.
+2. **Sistem mengirim kode aktivasi** (berlaku 72 jam) ke nomor HP/email anggota, beserta tautan unduh aplikasi.
+3. **Anggota memasang aplikasi**, memasukkan ID karyawan dan kode aktivasi.
+4. **Verifikasi OTP** ke nomor HP yang terdaftar, supaya kode yang bocor tidak bisa dipakai orang lain.
+5. **Membuat PIN 6 digit** dan, bila HP mendukung, mengaktifkan sidik jari/wajah untuk login cepat.
+6. **Menyetujui kebijakan privasi** (GPS hanya aktif saat respons) dan memberi izin lokasi, kamera, dan notifikasi.
+7. **Tur singkat** cara memakai tombol respons, lalu akun aktif. Admin FES melihat status "Aktif" di daftar anggota.
+
+**Aturan akun**
+- **Satu akun, satu HP aktif.** Ganti HP harus diaktifkan ulang (kode baru dari Admin FES atau verifikasi OTP).
+- **Lupa PIN:** reset sendiri lewat OTP ke nomor terdaftar. Kalau nomor juga berganti, minta Admin FES.
+- **Pindah regu/peran:** diubah Admin FES dan langsung berlaku tanpa login ulang.
+- **Keluar dari FES atau HP hilang:** Admin FES menonaktifkan akun. Sesi di HP langsung berakhir dan data aplikasi di HP dihapus dari jarak jauh. Data respons yang sudah tersimpan di server tetap ada.
+- **Jika SSO perusahaan tersedia** (pertanyaan terbuka #6): langkah kode aktivasi diganti login dengan akun PT Vale. Admin FES tetap menentukan peran dan regu.
+
+**Alternatif bila anggota belum ada di sistem:** di layar login ada tombol **"Minta akses"**. Anggota mengisi ID karyawan dan nomor HP, lalu permintaan masuk ke Admin FES untuk disetujui atau ditolak. Tanpa persetujuan, akun tidak bisa dipakai.
+
+### 5.12 Halaman Admin (Web)
+
+**Admin FES**
+
+| Halaman | Yang bisa dilakukan |
+|---|---|
+| **Ringkasan admin** | Jumlah anggota aktif, aktivasi yang belum selesai, permintaan akses baru, unit yang tidak siap, dan hal yang perlu ditindaklanjuti |
+| **Anggota & akses** | Tambah/impor anggota, kirim ulang kode aktivasi, ubah peran/regu/station, reset perangkat, nonaktifkan akun dan hapus data aplikasi dari HP, menyetujui "Minta akses" |
+| **Regu & jadwal jaga** | Membuat regu dan jadwal on duty per shift. Daftar personel on duty di Dispatch Call terisi otomatis dari jadwal ini |
+| **Unit kendaraan** | Daftar unit (FS R6, FS E8, EMS6, …) dan statusnya: Siap / Sedang respons / Perbaikan. Unit yang sedang perbaikan tidak muncul di pilihan Dispatch |
+| **Master data** | Response station & koordinat, lokasi/area, jenis respons, sub-jenis, incident type, sumber informasi, instansi pendukung (BPBD, Damkar) |
+| **Aturan respons** | Tahapan tambahan per jenis respons, field wajib, batas kirim Preliminary (default 15 menit), jeda mode fokus (default 15 detik) |
+| **Template & penomoran** | Format nomor ERR, template ekspor Excel/PDF untuk Preliminary dan ERR, kop/logo laporan |
+| **Penerima laporan** | Daftar penerima Preliminary dan ERR per jenis respons, serta aturan push notification ke Supervisor |
+| **Alur persetujuan** | Siapa yang mereview dan menyetujui ERR, dan eskalasi bila ERR belum direview dalam 24 jam |
+| **Koreksi laporan** | Membuka ERR final untuk revisi. Revisi selalu jadi versi baru dengan alasan tercatat, versi lama tetap tersimpan |
+| **Log audit** | Riwayat login, perubahan data waktu, perubahan master data, unduhan data. Bisa difilter dan diekspor |
+
+**Super Admin (IT)**
+
+| Halaman | Yang bisa dilakukan |
+|---|---|
+| **Pengaturan keamanan** | Kebijakan PIN, masa berlaku sesi, kewajiban biometrik, versi aplikasi minimum |
+| **Integrasi** | SSO perusahaan, layanan SMS/WhatsApp untuk kode aktivasi dan OTP, email |
+| **Data & retensi** | Lama penyimpanan arsip, jadwal backup, pemulihan data |
+| **Hak Admin FES** | Menunjuk atau mencabut Admin FES |
+
 ---
 
 ## 6. Alur Pengguna (User Flow)
+
+### 6.0 Alur keseluruhan
+
+```mermaid
+flowchart TD
+  A[Admin FES membuat akun<br/>& jadwal jaga] --> B[Anggota aktivasi akun di HP]
+  B --> C[Awal shift: buka aplikasi<br/>status regu siaga]
+  C --> D[Panggilan darurat → Dispatch Call<br/>isi lokasi, unit, Target Time]
+  D --> E[Start to Scene → Arrival on Scene<br/>GPS, foto, catatan]
+  E --> F[Preliminary Report dikirim<br/>≤ 15 menit setelah tiba]
+  F --> G[Leave Scene → Return to Stn<br/>Draft ERR otomatis]
+  G --> H[Team Leader lengkapi & ajukan ERR]
+  H --> I{Supervisor review}
+  I -- Perlu perbaikan --> H
+  I -- Setuju --> J[ERR final & terkunci]
+  J --> K[Arsip & dashboard<br/>per jenis respons]
+```
+
+1. **Persiapan (sekali di awal):** Admin FES membuat akun, regu, jadwal jaga, dan master data. Anggota mengaktifkan akun di HP (5.11).
+2. **Awal shift:** anggota on duty membuka aplikasi. Beranda menampilkan regu dan station yang siaga.
+3. **Respons:** Team Leader menekan Dispatch Call, lalu tahapan Start → Arrival → Leave → Return (5.1). GPS, foto, dan catatan berjalan di sepanjang respons.
+4. **Pelaporan:** Preliminary dikirim setelah tiba (5.4). Draft ERR dibuat otomatis saat Return to Stn (5.5).
+5. **Persetujuan:** Team Leader mengajukan ERR, Supervisor menyetujui atau mengembalikan untuk diperbaiki.
+6. **Analisis:** ERR final masuk arsip dan dashboard per jenis respons (5.6).
+
 
 ### 6.1 Alur respons di lapangan (Mobile)
 
@@ -543,18 +636,46 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 
 ---
 
-## 11. Rencana Rilis & Timeline
+## 11. Roadmap & Rencana Rilis
 
-**[ASUMSI]** Estimasi untuk tim kecil (1 PM, 2–3 developer, 1 UI/UX, 1 QA).
+**[ASUMSI]** Estimasi untuk tim kecil (1 product owner dari FES, 1 PM, 2–3 developer, 1 UI/UX, 1 QA), dimulai pertengahan November 2026. Tanggal akan bergeser bila kebijakan IT atau pengadaan butuh waktu lebih lama.
 
-| Fase | Durasi | Cakupan |
-|---|---|---|
-| **Fase 0: Discovery** | 2 minggu | Mengumpulkan template Excel Preliminary & ERR saat ini, SOP tahapan respons, kebijakan IT, wawancara tim FES |
-| **Fase 1: Desain** | 2–3 minggu | Wireframe, prototipe, uji coba prototipe dengan Team Leader |
-| **Fase 2: MVP** | 8–10 minggu | Tombol respons, GPS & jarak, foto evidence, Preliminary & ERR otomatis, ekspor PDF/Excel, arsip dasar, manajemen user, mode offline |
-| **Fase 3: Pilot** | 4 minggu | Uji coba dengan 1 regu/pos di Kolaka, berjalan **paralel dengan Excel** sebagai cadangan |
-| **Fase 4: Rilis penuh** | 2 minggu | Pelatihan seluruh anggota FES, Excel manual dihentikan |
-| **Fase 5: Pengembangan lanjut** | Berkelanjutan | Dashboard analitik lanjutan, pelacakan live di peta, notifikasi WhatsApp/email, integrasi sistem HSE, input suara |
+```mermaid
+gantt
+  title Roadmap FES Emergency Report
+  dateFormat YYYY-MM-DD
+  axisFormat %b %Y
+  section Persiapan
+  Fase 0 Discovery & keputusan        :f0, 2026-11-16, 3w
+  Fase 1 Desain & uji prototipe        :f1, after f0, 3w
+  section Pembangunan MVP
+  Sprint 1 Akun, admin, master data    :s1, after f1, 2w
+  Sprint 2 Alur respons, GPS, offline  :s2, after s1, 2w
+  Sprint 3 Foto, Preliminary, ERR      :s3, after s2, 2w
+  Sprint 4 Persetujuan, ekspor, dashboard :s4, after s3, 2w
+  Sprint 5 Keamanan, uji beban, perbaikan :s5, after s4, 2w
+  section Uji coba & rilis
+  Fase 3 Pilot 1 regu FOX-5           :p3, after s5, 4w
+  Fase 4 Pelatihan & rilis penuh      :p4, after p3, 2w
+  section Lanjutan
+  Fase 5 Pengembangan lanjut          :p5, after p4, 8w
+```
+
+| Fase | Perkiraan waktu | Isi | Hasil / syarat lanjut |
+|---|---|---|---|
+| **0. Discovery** | Nov – awal Des 2026 (3 minggu) | Menjawab pertanyaan terbuka #2–10, kebijakan IT & server, **penunjukan Admin FES dan Super Admin**, data awal (anggota, unit, station, lokasi) | PRD disetujui, data awal siap diimpor |
+| **1. Desain** | Des 2026 (3 minggu) | Desain Figma final (mobile, tablet, dashboard, halaman admin), **uji prototipe dengan Team Leader pakai sarung tangan** | Desain disetujui FES |
+| **2. MVP** | Jan – Mar 2027 (10 minggu, 5 sprint) | S1 akun & aktivasi, halaman admin, master data · S2 alur respons, GPS, mode offline · S3 foto, Preliminary, draft ERR · S4 persetujuan ERR, ekspor Excel/PDF, dashboard dasar · S5 uji keamanan, uji di berbagai HP, perbaikan | Semua fitur *Must have* berjalan di lingkungan uji |
+| **3. Pilot** | Apr 2027 (4 minggu) | 1 regu di FIRE STATION FAP FOX-5, **berjalan paralel dengan Excel** | Lolos syarat go-live (di bawah) |
+| **4. Rilis penuh** | Mei 2027 (2 minggu) | Aktivasi akun semua anggota, pelatihan per regu, Excel manual dihentikan | Seluruh respons tercatat lewat aplikasi |
+| **5. Pengembangan lanjut** | Jun 2027 dst. | Mode fokus & dashboard lanjutan, pelacakan live, SSO, notifikasi WhatsApp/email, integrasi HSE, input suara | Sesuai prioritas FES |
+
+**Syarat go-live setelah pilot**
+- ≥ 95% respons selama pilot tercatat lewat aplikasi dan datanya sama dengan Excel.
+- Tidak ada data respons yang hilang, termasuk saat tanpa sinyal.
+- Preliminary terkirim ≤ 15 menit pada ≥ 90% respons.
+- Tidak ada lagi petugas yang standby di kantor untuk membuat laporan selama pilot.
+- Team Leader menilai aplikasi mudah dipakai (skor ≥ 4/5).
 
 ### Prioritas fitur (MoSCoW)
 
@@ -589,7 +710,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 3. Siapa saja yang **wajib menerima** Preliminary Report, dan berapa batas waktunya?
 4. ~~HP pribadi atau dinas~~ **Terjawab:** HP pribadi (lihat kebutuhan non-fungsional *HP pribadi (BYOD)* dan risiko di bagian 12).
 5. Apakah ada kebijakan **server on-premise** atau cloud tertentu yang wajib dipakai?
-6. Apakah tersedia **SSO/Active Directory** perusahaan untuk login?
+6. Apakah tersedia **SSO/Active Directory** perusahaan untuk login? (Menentukan cara aktivasi akun di 5.11.)
 7. Apakah ada **peta digital area perusahaan** yang bisa dipakai?
 8. Berapa jumlah anggota FES, pos, dan unit kendaraan yang akan memakai aplikasi?
 9. Selain kebakaran, jenis kejadian apa saja yang ditangani (rescue, medis, B3, dan lain-lain)?
@@ -605,6 +726,12 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 16. ~~Jam datang Off Duty Recall & Support~~ **Terjawab:** ya, dicatat (jam dipanggil + jam tiba) di Preliminary, ERR, dan kronologi.
 17. ~~Review format Preliminary Report~~ **Terjawab:** format, daftar distribusi, dan target kirim ≤ 15 menit **disetujui**.
 18. ~~Kolom Jam Tiba di ERR~~ **Terjawab:** boleh ditambah. Lihat `templates/ERR_Form_Template.xlsx`.
+
+**Akun & admin:**
+
+19. Siapa yang ditunjuk sebagai **Admin FES** (usulan: Koordinator/Superintendent FES + 1 cadangan) dan **Super Admin** (usulan: tim IT PT Vale)?
+20. Kode aktivasi dan OTP dikirim lewat apa: **WhatsApp, SMS, atau email** perusahaan?
+21. Apakah jadwal jaga regu sudah ada dalam bentuk file yang bisa diimpor?
 
 ---
 
