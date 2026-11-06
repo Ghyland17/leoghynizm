@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.1 (Draft – alur akun, peran & halaman admin, roadmap) |
+| Versi dokumen | 1.2 (Draft – aktivasi via WhatsApp, fitur jadwal jaga) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -424,21 +424,25 @@ Anggota FES **tidak mendaftar sendiri**. Akun dibuat oleh Admin FES, lalu anggot
 
 ```mermaid
 flowchart LR
-  A[Admin FES menambah anggota<br/>satu per satu atau impor Excel] --> B[Sistem kirim kode aktivasi<br/>via WhatsApp/SMS/email]
+  A[Admin FES menambah anggota<br/>satu per satu atau impor Excel] --> B[Sistem kirim kode aktivasi<br/>via WhatsApp]
   B --> C[Anggota pasang aplikasi<br/>& masukkan ID karyawan + kode]
-  C --> D[Verifikasi OTP<br/>ke nomor HP terdaftar]
+  C --> D[Verifikasi OTP via WhatsApp<br/>ke nomor terdaftar]
   D --> E[Buat PIN 6 digit<br/>+ aktifkan sidik jari/wajah]
   E --> F[Setujui kebijakan privasi<br/>& izin lokasi, kamera, notifikasi]
   F --> G[Tur singkat 1 menit<br/>lalu siap dipakai]
 ```
 
 1. **Admin FES menambah anggota**: ID karyawan, nama, nomor HP, regu, station, dan peran. Bisa satu per satu atau impor dari Excel.
-2. **Sistem mengirim kode aktivasi** (berlaku 72 jam) ke nomor HP/email anggota, beserta tautan unduh aplikasi.
+2. **Sistem mengirim kode aktivasi lewat WhatsApp** (berlaku 72 jam) ke nomor HP anggota, beserta tautan unduh aplikasi.
 3. **Anggota memasang aplikasi**, memasukkan ID karyawan dan kode aktivasi.
-4. **Verifikasi OTP** ke nomor HP yang terdaftar, supaya kode yang bocor tidak bisa dipakai orang lain.
+4. **Verifikasi OTP lewat WhatsApp** ke nomor yang terdaftar, supaya kode yang bocor tidak bisa dipakai orang lain.
 5. **Membuat PIN 6 digit** dan, bila HP mendukung, mengaktifkan sidik jari/wajah untuk login cepat.
 6. **Menyetujui kebijakan privasi** (GPS hanya aktif saat respons) dan memberi izin lokasi, kamera, dan notifikasi.
 7. **Tur singkat** cara memakai tombol respons, lalu akun aktif. Admin FES melihat status "Aktif" di daftar anggota.
+
+**Pengiriman lewat WhatsApp**
+- Memakai **WhatsApp Business API resmi** melalui penyedia (BSP) yang disetujui IT, dengan nomor pengirim atas nama FES PT Vale. Pesan berupa template yang sudah disetujui WhatsApp.
+- Bila WhatsApp tidak terkirim (nomor tidak memakai WhatsApp atau tanpa sinyal), Admin FES bisa menampilkan **kode aktivasi / QR** di halaman Anggota untuk dipindai langsung di station.
 
 **Aturan akun**
 - **Satu akun, satu HP aktif.** Ganti HP harus diaktifkan ulang (kode baru dari Admin FES atau verifikasi OTP).
@@ -457,7 +461,7 @@ flowchart LR
 |---|---|
 | **Ringkasan admin** | Jumlah anggota aktif, aktivasi yang belum selesai, permintaan akses baru, unit yang tidak siap, dan hal yang perlu ditindaklanjuti |
 | **Anggota & akses** | Tambah/impor anggota, kirim ulang kode aktivasi, ubah peran/regu/station, reset perangkat, nonaktifkan akun dan hapus data aplikasi dari HP, menyetujui "Minta akses" |
-| **Regu & jadwal jaga** | Membuat regu dan jadwal on duty per shift. Daftar personel on duty di Dispatch Call terisi otomatis dari jadwal ini |
+| **Regu & jadwal jaga** | Mengatur regu dan jadwal jaga langsung di aplikasi (lihat 5.13). Daftar personel on duty di Dispatch Call terisi otomatis dari jadwal ini |
 | **Unit kendaraan** | Daftar unit (FS R6, FS E8, EMS6, …) dan statusnya: Siap / Sedang respons / Perbaikan. Unit yang sedang perbaikan tidak muncul di pilihan Dispatch |
 | **Master data** | Response station & koordinat, lokasi/area, jenis respons, sub-jenis, incident type, sumber informasi, instansi pendukung (BPBD, Damkar) |
 | **Aturan respons** | Tahapan tambahan per jenis respons, field wajib, batas kirim Preliminary (default 15 menit), jeda mode fokus (default 15 detik) |
@@ -472,9 +476,38 @@ flowchart LR
 | Halaman | Yang bisa dilakukan |
 |---|---|
 | **Pengaturan keamanan** | Kebijakan PIN, masa berlaku sesi, kewajiban biometrik, versi aplikasi minimum |
-| **Integrasi** | SSO perusahaan, layanan SMS/WhatsApp untuk kode aktivasi dan OTP, email |
+| **Integrasi** | SSO perusahaan, **WhatsApp Business API** untuk kode aktivasi, OTP, dan pengingat jadwal, email |
 | **Data & retensi** | Lama penyimpanan arsip, jadwal backup, pemulihan data |
 | **Hak Admin FES** | Menunjuk atau mencabut Admin FES |
+
+### 5.13 Jadwal Jaga (fitur Admin)
+
+Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur langsung di halaman admin. Jadwal ini menjadi sumber daftar **personel on duty** di Dispatch Call, sehingga Team Leader tidak perlu memilih personel satu per satu.
+
+**Pengaturan dasar (sekali di awal)**
+- **Regu:** nama regu (misalnya Regu A–D), Team Leader, dan anggota tetap.
+- **Pola shift:** jam mulai dan selesai tiap shift (misalnya Pagi 07:00–19:00, Malam 19:00–07:00), bisa disesuaikan per station.
+- **Pola rotasi:** urutan regu per hari (misalnya A-B-C-D berulang). Pola ini dipakai untuk mengisi jadwal otomatis.
+- **Kebutuhan minimum:** jumlah personel minimum per shift per station dan per unit (misalnya FS R6 minimal 4 orang, EMS6 minimal 1 nurse).
+
+**Membuat & mengubah jadwal**
+- **Isi otomatis** satu bulan dari pola rotasi, lalu disesuaikan bila perlu.
+- **Tampilan kalender** per minggu/bulan, per station, dengan warna per regu.
+- **Tukar jaga, izin, cuti, dan sakit:** pilih anggota di tanggal tertentu, tandai status, lalu tunjuk pengganti.
+- **Peringatan otomatis** bila shift kurang dari kebutuhan minimum, ada anggota dijadwalkan di dua tempat, atau anggota jaga dua shift berturut-turut.
+- **Salin jadwal** dari bulan sebelumnya, lalu ubah seperlunya.
+- **Terbitkan:** jadwal berstatus Draft sampai diterbitkan. Setelah terbit, anggota menerima pemberitahuan. Perubahan setelah terbit tercatat di log audit.
+
+**Di aplikasi anggota**
+- Menu **Jadwal saya**: shift minggu ini dan bulan ini.
+- **Pengingat via WhatsApp/push** H-1 dan 1 jam sebelum shift dimulai.
+- Saat shift dimulai, beranda otomatis menampilkan regu dan station yang sedang siaga.
+- Anggota bisa **mengajukan tukar jaga atau izin** dari aplikasi. Pengajuan masuk ke Admin FES untuk disetujui.
+
+**Hubungan dengan respons**
+- Dispatch Call otomatis mengisi personel on duty dari shift yang sedang berjalan. Team Leader tinggal menambah atau mengurangi.
+- **Off Duty Recall** menampilkan anggota yang sedang tidak jaga beserta nomor kontaknya, supaya mudah dipanggil.
+- Dashboard bisa menampilkan respons per regu dan per shift.
 
 ---
 
@@ -581,6 +614,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Incident** (Kejadian) | id, nomor_err (ESS/Pom/…), tanggal, region, lokasi, koordinat_tkp, response_station_id, response_type, incident_type, sub_type, info_diterima_dari, detail_informasi, status, dibuat_oleh |
 | **ResponseTime** | incident_id, dispatch_call, start_to_scene, arrival_on_scene, return_to_stn, on_scene_time, respond_time, target_time, time_gap, mileage_km |
 | **ResponseUnit** | id, incident_id, unit_kendaraan_id (R6/E8/EMS6…), team_leader_id |
+| **Squad / Shift** | id, nama_regu, team_leader_id, anggota[] · id, station_id, nama_shift, jam_mulai, jam_selesai, pola_rotasi |
+| **ShiftAssignment** | id, tanggal, shift_id, station_id, regu_id, personel_id, status (jaga / izin / cuti / sakit / tukar), pengganti_id, status_terbit |
 | **ResponsePersonnel** | incident_id, personel_id, kategori (on_duty / medical / off_duty_recall / support), instansi_pendukung, jam_dipanggil, jam_tiba |
 | **PreliminaryVersion** | incident_id, versi (INITIAL/UPDATE n), status_kode, size_up, korban_sementara, tindakan, rencana, status_respons, waktu_kirim, dikirim_oleh |
 | **Casualty** | incident_id, adult_m, adult_f, child_m, child_f, infant_m, infant_f, mass_casualty, total, detail (employee/contractor/dependent_vale/dependent_contractor/community), kondisi_triase (green/yellow/red/black) |
@@ -649,7 +684,7 @@ gantt
   Fase 0 Discovery & keputusan        :f0, 2026-11-16, 3w
   Fase 1 Desain & uji prototipe        :f1, after f0, 3w
   section Pembangunan MVP
-  Sprint 1 Akun, admin, master data    :s1, after f1, 2w
+  Sprint 1 Akun, admin, jadwal jaga   :s1, after f1, 2w
   Sprint 2 Alur respons, GPS, offline  :s2, after s1, 2w
   Sprint 3 Foto, Preliminary, ERR      :s3, after s2, 2w
   Sprint 4 Persetujuan, ekspor, dashboard :s4, after s3, 2w
@@ -665,7 +700,7 @@ gantt
 |---|---|---|---|
 | **0. Discovery** | Nov – awal Des 2026 (3 minggu) | Menjawab pertanyaan terbuka #2–10, kebijakan IT & server, **penunjukan Admin FES dan Super Admin**, data awal (anggota, unit, station, lokasi) | PRD disetujui, data awal siap diimpor |
 | **1. Desain** | Des 2026 (3 minggu) | Desain Figma final (mobile, tablet, dashboard, halaman admin), **uji prototipe dengan Team Leader pakai sarung tangan** | Desain disetujui FES |
-| **2. MVP** | Jan – Mar 2027 (10 minggu, 5 sprint) | S1 akun & aktivasi, halaman admin, master data · S2 alur respons, GPS, mode offline · S3 foto, Preliminary, draft ERR · S4 persetujuan ERR, ekspor Excel/PDF, dashboard dasar · S5 uji keamanan, uji di berbagai HP, perbaikan | Semua fitur *Must have* berjalan di lingkungan uji |
+| **2. MVP** | Jan – Mar 2027 (10 minggu, 5 sprint) | S1 akun & aktivasi WhatsApp, halaman admin, master data, **jadwal jaga** · S2 alur respons, GPS, mode offline · S3 foto, Preliminary, draft ERR · S4 persetujuan ERR, ekspor Excel/PDF, dashboard dasar · S5 uji keamanan, uji di berbagai HP, perbaikan | Semua fitur *Must have* berjalan di lingkungan uji |
 | **3. Pilot** | Apr 2027 (4 minggu) | 1 regu di FIRE STATION FAP FOX-5, **berjalan paralel dengan Excel** | Lolos syarat go-live (di bawah) |
 | **4. Rilis penuh** | Mei 2027 (2 minggu) | Aktivasi akun semua anggota, pelatihan per regu, Excel manual dihentikan | Seluruh respons tercatat lewat aplikasi |
 | **5. Pengembangan lanjut** | Jun 2027 dst. | Mode fokus & dashboard lanjutan, pelacakan live, SSO, notifikasi WhatsApp/email, integrasi HSE, input suara | Sesuai prioritas FES |
@@ -695,6 +730,7 @@ gantt
 | HP pribadi rusak, basah, atau terlalu panas di lokasi kebakaran | Data hilang | Sinkronisasi sesering mungkin ke server; **dua anggota tim bisa mencatat di respons yang sama** (cadangan); sediakan pelindung tahan air/pouch HP **[usulan]** |
 | HP pribadi beragam merek, versi OS, dan kondisi | Aplikasi tidak berjalan sama di semua HP | Uji di berbagai HP anggota saat pilot, tetapkan spesifikasi minimum, fitur penghemat baterai |
 | Kekhawatiran privasi anggota karena GPS di HP pribadi | Anggota enggan memasang aplikasi | GPS hanya aktif saat respons, kebijakan privasi yang jelas, data pribadi tidak diakses |
+| Pendaftaran WhatsApp Business API & persetujuan template butuh waktu | Aktivasi akun tertunda | Ajukan di Fase 0; siapkan cadangan kode/QR di halaman admin |
 | Biaya kuota data & baterai ditanggung pribadi | Adopsi rendah | Pertimbangkan **tunjangan pulsa/kuota** dari perusahaan; foto besar diunggah via Wi-Fi station |
 | Baterai habis saat respons panjang | Pencatatan terhenti | Optimasi GPS, charger di kendaraan, peringatan baterai rendah |
 | Penolakan perubahan dari kebiasaan Excel | Adopsi rendah | Format laporan **mengikuti template lama**, pelatihan, masa pilot paralel |
@@ -729,9 +765,9 @@ gantt
 
 **Akun & admin:**
 
-19. Siapa yang ditunjuk sebagai **Admin FES** (usulan: Koordinator/Superintendent FES + 1 cadangan) dan **Super Admin** (usulan: tim IT PT Vale)?
-20. Kode aktivasi dan OTP dikirim lewat apa: **WhatsApp, SMS, atau email** perusahaan?
-21. Apakah jadwal jaga regu sudah ada dalam bentuk file yang bisa diimpor?
+19. Siapa yang ditunjuk sebagai **Admin FES** (usulan: Koordinator/Superintendent FES + 1 cadangan) dan **Super Admin** (usulan: tim IT PT Vale)? **Status:** nama belum ditentukan. Penunjukan menjadi tugas Fase 0, sebelum Sprint 1 dimulai.
+20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** WhatsApp (lihat 5.11).
+21. ~~Jadwal jaga dalam bentuk file~~ **Terjawab:** belum ada. Jadwal dibuat dan diatur lewat fitur admin (lihat 5.13).
 
 ---
 
