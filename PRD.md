@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.6 (Draft – Target Time diisi tim respons, HP pribadi) |
+| Versi dokumen | 0.7 (Draft – identitas visual & logo FES PT Vale) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -362,6 +362,16 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Kepatuhan** | Mengikuti kebijakan IT & keamanan data PT Vale Indonesia (termasuk lokasi server/hosting) |
 
 ---
+
+## 7A. Identitas Visual
+
+| Elemen | Ketentuan |
+|---|---|
+| **Logo aplikasi** | Logo resmi **Fire & Emergency Services – PT Vale Indonesia** ([`assets/brand/logo-fes-pt-vale.png`](assets/brand/logo-fes-pt-vale.png)). Dipakai sebagai ikon aplikasi Android/iOS, splash screen, status bar aplikasi, halaman login, header dashboard web, dan kop Preliminary Report/ERR. Logo ditampilkan di atas lingkaran putih, tidak boleh diubah warnanya, diregangkan, atau dipotong. |
+| **Warna brand** | Navy logo `#14166E` untuk bar atas dan elemen identitas. Merah logo `#D3141A` khusus untuk **tombol aksi respons** (Dispatch, Start, Arrival, Return), supaya tombol yang harus ditekan selalu paling menonjol. |
+| **Warna fungsi** | Kuning `#FFD43B` = data diisi tim, biru `#CFE2F3` = dihitung sistem (mengikuti konvensi form ERR); hijau/oranye = status sesuai/lewat target. |
+| **Tipografi** | Barlow Condensed (judul & label tombol besar), Barlow (teks), JetBrains Mono (jam & angka). |
+| **Mode malam** | Warna yang sama dengan latar gelap untuk respons malam hari; mengikuti pengaturan HP. |
 
 ## 8. Model Data (Garis Besar)
 
