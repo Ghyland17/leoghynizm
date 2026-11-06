@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 0.8 (Draft – mode fokus, notifikasi, glassmorphism & animasi) |
+| Versi dokumen | 0.9 (Draft – dashboard per jenis respons) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -96,7 +96,7 @@ Saat ini tim Fire Emergency & Service (FES) PT Vale Indonesia membuat laporan re
 | US-07 | Supervisor | menerima notifikasi saat Preliminary Report siap | saya bisa segera meneruskannya ke manajemen | Must |
 | US-08 | Supervisor | mereview, mengedit, dan menyetujui ERR | laporan final sesuai standar perusahaan | Must |
 | US-09 | Supervisor | mengekspor laporan ke PDF dan Excel | saya bisa mengirimnya sesuai format yang berlaku | Must |
-| US-10 | Manajemen | melihat dashboard statistik respons | saya bisa mengevaluasi kinerja tim | Should |
+| US-10 | Manajemen | melihat dashboard statistik respons yang bisa dipecah per jenis respons (FIRE, ALARM, MVA, RESCUE, HAZMAT, OIL SPILL, MEDICAL) | saya bisa mengevaluasi kinerja tim untuk tiap jenis kejadian | Should |
 | US-11 | Supervisor | mencari arsip kejadian berdasarkan tanggal, jenis, dan lokasi | data historis mudah ditemukan | Must |
 | US-12 | Petugas | tetap bisa mencatat tahapan saat sinyal hilang | data tidak hilang ketika berada di area tanpa sinyal | Must |
 | US-13 | Supervisor | melihat posisi tim yang sedang respons di peta | saya bisa memantau tanpa harus berada di lapangan | Should |
@@ -277,16 +277,66 @@ Nomor ERR dibuat otomatis dari **template yang diatur Admin** di menu Pengaturan
 
 ### 5.6 Dashboard & Arsip (Web)
 
-**Dashboard**
-- Jumlah kejadian per periode (harian, bulanan, tahunan) dan per jenis kejadian.
-- **Rata-rata Total Response Time** (Dispatch Call → Arrival on scene) dibandingkan dengan Target Time, beserta trennya dari waktu ke waktu.
-- Rata-rata durasi penanganan (tiba → padam → tutup).
-- Peta sebaran lokasi kejadian (heatmap).
-- Respons yang **sedang berjalan** (live) beserta posisi unit.
-- Status laporan: Draft / Menunggu review / Final.
+Dashboard memakai klasifikasi yang sama dengan form ERR:
+- **Response Type:** FIRE, ALARM, MVA, RESCUE, HAZMAT, OIL SPILL, MEDICAL (Patient Mobilisation).
+- **Incident Type:** Industrial, Non Industrial, Medical.
+- **Sub-jenis** per Response Type. Contoh: Wildland/Structural Fire, Alarm detection/Trouble-False, Motor VS Motor, Confined Space Rescue.
+
+**Filter global** (satu baris di atas, berlaku untuk semua angka dan grafik)
+- Periode: 30 hari, 3 bulan, 12 bulan, atau rentang tanggal sendiri.
+- Response Type: Semua atau salah satu jenis. Klik jenis di tabel atau grafik juga mengaktifkan filter ini (*drill-down*).
+- Response Station dan Incident Type.
+
+**Ringkasan (KPI) sesuai filter**
+- Jumlah respons, dibandingkan periode sebelumnya.
+- Rata-rata **Total Response Time** (Dispatch → Arrival) dan **% respons yang memenuhi Target Time**.
+- Rata-rata **On Scene Time** (waktu tempuh) dan **Respond Time** (Arrival → Return to Stn).
+- Jumlah korban, dengan rincian triase.
+- **Persentase false alarm** (untuk ALARM: *Trouble/False* dibanding total alarm).
+
+**Tabel per jenis respons** (satu baris per Response Type)
+
+| Kolom | Isi |
+|---|---|
+| Jumlah & porsi | Jumlah respons dan persentasenya dari total |
+| Total Response Time | Rata-rata dan median |
+| Memenuhi target | % respons dengan Total Response Time ≤ Target Time |
+| On Scene Time / Respond Time | Rata-rata |
+| Korban | Jumlah korban |
+| Sub-jenis terbanyak | Misalnya Wildland Fire (60%) |
+| Unit terbanyak | Misalnya FS R6 |
+
+**Grafik**
+- Jumlah respons per bulan, ditumpuk per Response Type (warna tetap per jenis).
+- Rata-rata Total Response Time per jenis, dengan penanda Target Time.
+- Rincian sub-jenis untuk jenis yang dipilih (atau Incident Type saat "Semua").
+- Korban per triase (Green/Yellow/Red/Black) dan per kategori (Employee, Contractor, Dependent, Community).
+- Pemakaian sumber daya per jenis: unit kendaraan, rata-rata personel, Off Duty Recall, dan bantuan luar (misalnya BPBD).
+- **Peta sebaran** lokasi kejadian yang ikut tersaring per jenis respons.
+
+**Lainnya**
+- **Respons yang sedang berjalan** (live): tahap saat ini, waktu berjalan, dan posisi unit.
+- Status laporan: Draft / Menunggu review / Final, beserta Preliminary yang terlambat dikirim (> 15 menit).
+- Setiap grafik punya tooltip saat disorot. Tabel per jenis menjadi tampilan tabel dari grafik (aksesibilitas).
+- Ekspor rekap per jenis respons ke Excel dan PDF.
+- Tampilan mengikuti identitas visual 7A (glassmorphism, fade).
+
+**Warna per jenis respons** (tetap di semua grafik, tidak berubah saat difilter)
+
+| Jenis | Warna |
+|---|---|
+| ALARM | Biru |
+| FIRE | Oranye |
+| MVA | Aqua |
+| RESCUE | Kuning |
+| HAZMAT | Magenta |
+| OIL SPILL | Hijau |
+| MEDICAL | Ungu |
+
+Merah logo tidak dipakai untuk jenis respons. Merah khusus untuk tombol aksi dan peringatan.
 
 **Arsip**
-- Daftar seluruh kejadian dengan pencarian dan filter (tanggal, jenis, area, unit, status).
+- Daftar seluruh kejadian dengan pencarian dan filter (tanggal, Response Type, sub-jenis, Incident Type, area, unit, status).
 - Halaman detail kejadian: timeline, peta rute, galeri foto, Preliminary Report, ERR, dan log audit.
 - Ekspor rekap ke Excel.
 
