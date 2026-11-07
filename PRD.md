@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.2 (Draft – aktivasi via WhatsApp, fitur jadwal jaga) |
+| Versi dokumen | 1.3 (Draft – aktivasi & OTP via email pribadi, fitur jadwal jaga) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -424,34 +424,43 @@ Anggota FES **tidak mendaftar sendiri**. Akun dibuat oleh Admin FES, lalu anggot
 
 ```mermaid
 flowchart LR
-  A[Admin FES menambah anggota<br/>satu per satu atau impor Excel] --> B[Sistem kirim kode aktivasi<br/>via WhatsApp]
+  A[Admin FES menambah anggota<br/>termasuk email pribadi] --> B[Sistem kirim kode aktivasi<br/>ke email pribadi]
   B --> C[Anggota pasang aplikasi<br/>& masukkan ID karyawan + kode]
-  C --> D[Verifikasi OTP via WhatsApp<br/>ke nomor terdaftar]
+  C --> D[Verifikasi OTP<br/>ke email pribadi terdaftar]
   D --> E[Buat PIN 6 digit<br/>+ aktifkan sidik jari/wajah]
   E --> F[Setujui kebijakan privasi<br/>& izin lokasi, kamera, notifikasi]
   F --> G[Tur singkat 1 menit<br/>lalu siap dipakai]
 ```
 
-1. **Admin FES menambah anggota**: ID karyawan, nama, nomor HP, regu, station, dan peran. Bisa satu per satu atau impor dari Excel.
-2. **Sistem mengirim kode aktivasi lewat WhatsApp** (berlaku 72 jam) ke nomor HP anggota, beserta tautan unduh aplikasi.
+1. **Admin FES menambah anggota**: ID karyawan, nama, **email pribadi**, nomor HP (untuk kontak), regu, station, dan peran. Bisa satu per satu atau impor dari Excel.
+2. **Sistem mengirim kode aktivasi ke email pribadi anggota** (berlaku 72 jam), beserta tautan unduh aplikasi.
 3. **Anggota memasang aplikasi**, memasukkan ID karyawan dan kode aktivasi.
-4. **Verifikasi OTP lewat WhatsApp** ke nomor yang terdaftar, supaya kode yang bocor tidak bisa dipakai orang lain.
+4. **Verifikasi OTP ke email pribadi** yang terdaftar, supaya kode aktivasi yang bocor tidak bisa dipakai orang lain.
 5. **Membuat PIN 6 digit** dan, bila HP mendukung, mengaktifkan sidik jari/wajah untuk login cepat.
 6. **Menyetujui kebijakan privasi** (GPS hanya aktif saat respons) dan memberi izin lokasi, kamera, dan notifikasi.
 7. **Tur singkat** cara memakai tombol respons, lalu akun aktif. Admin FES melihat status "Aktif" di daftar anggota.
 
-**Pengiriman lewat WhatsApp**
-- Memakai **WhatsApp Business API resmi** melalui penyedia (BSP) yang disetujui IT, dengan nomor pengirim atas nama FES PT Vale. Pesan berupa template yang sudah disetujui WhatsApp.
-- Bila WhatsApp tidak terkirim (nomor tidak memakai WhatsApp atau tanpa sinyal), Admin FES bisa menampilkan **kode aktivasi / QR** di halaman Anggota untuk dipindai langsung di station.
+**Pengiriman kode lewat email pribadi**
+
+Email pribadi (misalnya Gmail) hanya dipakai sebagai **saluran pengiriman kode**, bukan kunci akun. Yang menentukan seseorang boleh masuk tetap Admin FES. Pilihan ini dipakai karena gratis, cepat disiapkan, dan tidak bergantung pada kebijakan email kantor di HP pribadi.
+
+| Risiko | Pengaman |
+|---|---|
+| Alamat salah ketik atau bukan milik anggota | Alamat dicatat Admin FES, bukan diisi sendiri. Kode aktivasi yang diterima sekaligus membuktikan email itu benar milik anggota |
+| Keamanan email pribadi beragam | Kode saja tidak cukup untuk masuk: tetap perlu **ID karyawan + PIN**, dan akun terikat ke satu HP. OTP berlaku **5 menit**, maksimal **5 kali salah**, lalu dikunci 15 menit |
+| Anggota keluar tapi emailnya masih aktif | Akses tidak bergantung pada email. Akun yang dinonaktifkan Admin tidak bisa diaktifkan lagi dengan kode apa pun |
+| Permintaan kode untuk HP baru oleh orang lain | Login dari HP baru memicu notifikasi ke HP lama dan ke Admin FES. Admin bisa mewajibkan persetujuan manual |
+| Email masuk spam atau ada email palsu | Dikirim dari domain resmi perusahaan dengan SPF/DKIM/DMARC. Isi email hanya kode tanpa tautan login. Admin bisa menampilkan **kode/QR cadangan** di halaman Anggota untuk dipindai langsung di station |
+| Email pribadi termasuk data pribadi | Hanya dipakai untuk keperluan akun, dengan persetujuan anggota saat aktivasi, sesuai UU Pelindungan Data Pribadi (UU 27/2022). Mengganti alamat email hanya lewat Admin FES |
 
 **Aturan akun**
-- **Satu akun, satu HP aktif.** Ganti HP harus diaktifkan ulang (kode baru dari Admin FES atau verifikasi OTP).
-- **Lupa PIN:** reset sendiri lewat OTP ke nomor terdaftar. Kalau nomor juga berganti, minta Admin FES.
+- **Satu akun, satu HP aktif.** Ganti HP harus diaktifkan ulang (kode baru dari Admin FES atau OTP ke email pribadi).
+- **Lupa PIN:** reset sendiri lewat OTP ke email pribadi terdaftar. Kalau email juga berganti, minta Admin FES.
 - **Pindah regu/peran:** diubah Admin FES dan langsung berlaku tanpa login ulang.
 - **Keluar dari FES atau HP hilang:** Admin FES menonaktifkan akun. Sesi di HP langsung berakhir dan data aplikasi di HP dihapus dari jarak jauh. Data respons yang sudah tersimpan di server tetap ada.
 - **Jika SSO perusahaan tersedia** (pertanyaan terbuka #6): langkah kode aktivasi diganti login dengan akun PT Vale. Admin FES tetap menentukan peran dan regu.
 
-**Alternatif bila anggota belum ada di sistem:** di layar login ada tombol **"Minta akses"**. Anggota mengisi ID karyawan dan nomor HP, lalu permintaan masuk ke Admin FES untuk disetujui atau ditolak. Tanpa persetujuan, akun tidak bisa dipakai.
+**Alternatif bila anggota belum ada di sistem:** di layar login ada tombol **"Minta akses"**. Anggota mengisi ID karyawan, email pribadi, dan nomor HP, lalu permintaan masuk ke Admin FES untuk disetujui atau ditolak. Tanpa persetujuan, akun tidak bisa dipakai.
 
 ### 5.12 Halaman Admin (Web)
 
@@ -476,7 +485,7 @@ flowchart LR
 | Halaman | Yang bisa dilakukan |
 |---|---|
 | **Pengaturan keamanan** | Kebijakan PIN, masa berlaku sesi, kewajiban biometrik, versi aplikasi minimum |
-| **Integrasi** | SSO perusahaan, **WhatsApp Business API** untuk kode aktivasi, OTP, dan pengingat jadwal, email |
+| **Integrasi** | SSO perusahaan, **layanan pengiriman email** (domain resmi dengan SPF/DKIM/DMARC) untuk kode aktivasi, OTP, dan pengingat jadwal |
 | **Data & retensi** | Lama penyimpanan arsip, jadwal backup, pemulihan data |
 | **Hak Admin FES** | Menunjuk atau mencabut Admin FES |
 
@@ -500,7 +509,7 @@ Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur 
 
 **Di aplikasi anggota**
 - Menu **Jadwal saya**: shift minggu ini dan bulan ini.
-- **Pengingat via WhatsApp/push** H-1 dan 1 jam sebelum shift dimulai.
+- **Pengingat via push notification** (dan email) H-1 dan 1 jam sebelum shift dimulai.
 - Saat shift dimulai, beranda otomatis menampilkan regu dan station yang sedang siaga.
 - Anggota bisa **mengajukan tukar jaga atau izin** dari aplikasi. Pengajuan masuk ke Admin FES untuk disetujui.
 
@@ -700,7 +709,7 @@ gantt
 |---|---|---|---|
 | **0. Discovery** | Nov – awal Des 2026 (3 minggu) | Menjawab pertanyaan terbuka #2–10, kebijakan IT & server, **penunjukan Admin FES dan Super Admin**, data awal (anggota, unit, station, lokasi) | PRD disetujui, data awal siap diimpor |
 | **1. Desain** | Des 2026 (3 minggu) | Desain Figma final (mobile, tablet, dashboard, halaman admin), **uji prototipe dengan Team Leader pakai sarung tangan** | Desain disetujui FES |
-| **2. MVP** | Jan – Mar 2027 (10 minggu, 5 sprint) | S1 akun & aktivasi WhatsApp, halaman admin, master data, **jadwal jaga** · S2 alur respons, GPS, mode offline · S3 foto, Preliminary, draft ERR · S4 persetujuan ERR, ekspor Excel/PDF, dashboard dasar · S5 uji keamanan, uji di berbagai HP, perbaikan | Semua fitur *Must have* berjalan di lingkungan uji |
+| **2. MVP** | Jan – Mar 2027 (10 minggu, 5 sprint) | S1 akun & aktivasi via email, halaman admin, master data, **jadwal jaga** · S2 alur respons, GPS, mode offline · S3 foto, Preliminary, draft ERR · S4 persetujuan ERR, ekspor Excel/PDF, dashboard dasar · S5 uji keamanan, uji di berbagai HP, perbaikan | Semua fitur *Must have* berjalan di lingkungan uji |
 | **3. Pilot** | Apr 2027 (4 minggu) | 1 regu di FIRE STATION FAP FOX-5, **berjalan paralel dengan Excel** | Lolos syarat go-live (di bawah) |
 | **4. Rilis penuh** | Mei 2027 (2 minggu) | Aktivasi akun semua anggota, pelatihan per regu, Excel manual dihentikan | Seluruh respons tercatat lewat aplikasi |
 | **5. Pengembangan lanjut** | Jun 2027 dst. | Mode fokus & dashboard lanjutan, pelacakan live, SSO, notifikasi WhatsApp/email, integrasi HSE, input suara | Sesuai prioritas FES |
@@ -730,7 +739,7 @@ gantt
 | HP pribadi rusak, basah, atau terlalu panas di lokasi kebakaran | Data hilang | Sinkronisasi sesering mungkin ke server; **dua anggota tim bisa mencatat di respons yang sama** (cadangan); sediakan pelindung tahan air/pouch HP **[usulan]** |
 | HP pribadi beragam merek, versi OS, dan kondisi | Aplikasi tidak berjalan sama di semua HP | Uji di berbagai HP anggota saat pilot, tetapkan spesifikasi minimum, fitur penghemat baterai |
 | Kekhawatiran privasi anggota karena GPS di HP pribadi | Anggota enggan memasang aplikasi | GPS hanya aktif saat respons, kebijakan privasi yang jelas, data pribadi tidak diakses |
-| Pendaftaran WhatsApp Business API & persetujuan template butuh waktu | Aktivasi akun tertunda | Ajukan di Fase 0; siapkan cadangan kode/QR di halaman admin |
+| Email kode aktivasi/OTP masuk spam atau terlambat | Aktivasi tertunda | Kirim dari domain resmi terverifikasi, uji ke Gmail/Yahoo/Outlook saat Sprint 1, sediakan kode/QR cadangan di halaman admin |
 | Biaya kuota data & baterai ditanggung pribadi | Adopsi rendah | Pertimbangkan **tunjangan pulsa/kuota** dari perusahaan; foto besar diunggah via Wi-Fi station |
 | Baterai habis saat respons panjang | Pencatatan terhenti | Optimasi GPS, charger di kendaraan, peringatan baterai rendah |
 | Penolakan perubahan dari kebiasaan Excel | Adopsi rendah | Format laporan **mengikuti template lama**, pelatihan, masa pilot paralel |
@@ -766,7 +775,7 @@ gantt
 **Akun & admin:**
 
 19. Siapa yang ditunjuk sebagai **Admin FES** (usulan: Koordinator/Superintendent FES + 1 cadangan) dan **Super Admin** (usulan: tim IT PT Vale)? **Status:** nama belum ditentukan. Penunjukan menjadi tugas Fase 0, sebelum Sprint 1 dimulai.
-20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** WhatsApp (lihat 5.11).
+20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** email pribadi anggota (lihat 5.11).
 21. ~~Jadwal jaga dalam bentuk file~~ **Terjawab:** belum ada. Jadwal dibuat dan diatur lewat fitur admin (lihat 5.13).
 
 ---
