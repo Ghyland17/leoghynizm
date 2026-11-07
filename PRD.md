@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.3 (Draft – aktivasi & OTP via email pribadi, fitur jadwal jaga) |
+| Versi dokumen | 1.4 (Draft – menu Jadwal saya di aplikasi anggota) |
 | Tanggal | 5 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -507,11 +507,13 @@ Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur 
 - **Salin jadwal** dari bulan sebelumnya, lalu ubah seperlunya.
 - **Terbitkan:** jadwal berstatus Draft sampai diterbitkan. Setelah terbit, anggota menerima pemberitahuan. Perubahan setelah terbit tercatat di log audit.
 
-**Di aplikasi anggota**
-- Menu **Jadwal saya**: shift minggu ini dan bulan ini.
+**Di aplikasi anggota (menu Jadwal saya)**
+- **Kartu shift berikutnya** di beranda dan di menu Jadwal saya: nama shift, jam, tanggal, regu, station, dan hitung mundur ("mulai dalam 18 jam 13 mnt"). Saat shift berjalan, kartu berubah menjadi "Sedang jaga".
+- **Daftar 14 hari ke depan**, dengan status tiap shift: Jaga, Sedang jaga, atau pengajuan yang menunggu atau sudah disetujui.
 - **Pengingat via push notification** (dan email) H-1 dan 1 jam sebelum shift dimulai.
 - Saat shift dimulai, beranda otomatis menampilkan regu dan station yang sedang siaga.
-- Anggota bisa **mengajukan tukar jaga atau izin** dari aplikasi. Pengajuan masuk ke Admin FES untuk disetujui.
+- **Ajukan tukar jaga / izin** dari aplikasi: pilih shift (3 minggu ke depan), jenis (Tukar jaga, Izin, Cuti, Sakit), pengganti (khusus tukar jaga), dan alasan (wajib). Pengajuan masuk ke Admin FES dan statusnya terlihat di daftar **Pengajuan saya** (Menunggu, Disetujui, Ditolak).
+- **Pengaturan pengingat** per anggota: H-1, 1 jam sebelum shift, dan opsi kirim juga ke email pribadi.
 
 **Hubungan dengan respons**
 - Dispatch Call otomatis mengisi personel on duty dari shift yang sedang berjalan. Team Leader tinggal menambah atau mengurangi.
