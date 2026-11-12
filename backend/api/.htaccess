@@ -1,0 +1,11 @@
+# FES API — semua permintaan diarahkan ke index.php; file sensitif diblokir.
+Options -Indexes
+<FilesMatch "^(config\.php|config\.sample\.php|lib\.php|schema\.sql|seed\.php|.*\.log|.*\.lock)$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>

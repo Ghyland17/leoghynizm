@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.6 (Draft – regu Alpha/Bravo/Charlie/Delta, 3 shift, jam kerja individu) |
+| Versi dokumen | 1.7 (Draft – backend PHP + MySQL, data tersimpan di server) |
 | Tanggal | 12 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -753,6 +753,24 @@ Audit alur sebelumnya juga memperbaiki: Admin FES bisa memberi peran Admin/Super
 ```
 
 ---
+
+## 9A. Backend v2.0 (sudah dibuat)
+
+Backend versi pertama sudah tersedia di folder `backend/api` dan berjalan di web hosting biasa, termasuk Hostinger.
+
+| Bagian | Keputusan |
+|---|---|
+| Bahasa & database | PHP 8.1+ dengan MySQL/MariaDB. Dipilih karena berjalan di semua paket web hosting tanpa VPS. |
+| Keamanan kueri | Semua kueri memakai *prepared statement* (PDO) sehingga kebal SQL injection |
+| Kata sandi | Hash Argon2id/bcrypt. Sandi awal wajib diganti saat pertama masuk. 5 kali salah membuat akun terkunci 15 menit. Ada batas percobaan per IP. |
+| Sesi | Token acak 256-bit. Yang disimpan di database hanya hash SHA-256-nya. Web keluar otomatis setelah 1 jam tidak aktif. Aplikasi HP tetap masuk sampai menekan Keluar. |
+| Login dua langkah | Kode 6 digit lewat email (SMTP) untuk Admin FES dan Super Admin. Ada pilihan perangkat tepercaya selama 30 hari dengan token dari server. |
+| Hak akses | Dicek di server untuk setiap endpoint sesuai peran (bagian 3.1) |
+| Respons & ERR | Disinkronkan otomatis dari aplikasi. Saat tanpa sinyal, data ditahan dan dikirim ulang. Perubahan yang bentrok dideteksi lewat nomor versi. Koordinator menyetujui ERR atau meminta revisi. |
+| Lainnya | Upload foto divalidasi sebagai gambar asli. CORS hanya untuk aplikasi Android. Semua tindakan penting tercatat di log audit. |
+| Pengujian | 77 tes API, 23 tes ujung-ke-ujung (web + aplikasi + database), dan 6 tes aplikasi Android lintas asal. Semuanya lulus. |
+
+Panduan pemasangan: `deploy/PANDUAN-HOSTINGER.md`.
 
 ## 10. Metrik Keberhasilan
 
