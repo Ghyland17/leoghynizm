@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.7 (Draft – backend PHP + MySQL, data tersimpan di server) |
+| Versi dokumen | 1.8 (Draft – backend v2.1: kalender absen/pengganti, unit, data master di server) |
 | Tanggal | 12 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -768,7 +768,8 @@ Backend versi pertama sudah tersedia di folder `backend/api` dan berjalan di web
 | Hak akses | Dicek di server untuk setiap endpoint sesuai peran (bagian 3.1) |
 | Respons & ERR | Disinkronkan otomatis dari aplikasi. Saat tanpa sinyal, data ditahan dan dikirim ulang. Perubahan yang bentrok dideteksi lewat nomor versi. Koordinator menyetujui ERR atau meminta revisi. |
 | Lainnya | Upload foto divalidasi sebagai gambar asli. CORS hanya untuk aplikasi Android. Semua tindakan penting tercatat di log audit. |
-| Pengujian | 77 tes API, 23 tes ujung-ke-ujung (web + aplikasi + database), dan 6 tes aplikasi Android lintas asal. Semuanya lulus. |
+| Jadwal & master (v2.1) | Tanda Izin/Cuti/Sakit dan pengganti per shift, kebutuhan minimum personel, unit kendaraan (Siap/Perbaikan, "Sedang respons" otomatis), data master (station, lokasi, sumber, instansi), penerima laporan, dan pengaturan kode email tersimpan di server. Database lama diperbarui otomatis. |
+| Pengujian | 99 tes API, 37 tes ujung-ke-ujung (web + aplikasi + database), dan 7 tes aplikasi Android lintas asal. Semuanya lulus. |
 
 Panduan pemasangan: `deploy/PANDUAN-HOSTINGER.md`.
 

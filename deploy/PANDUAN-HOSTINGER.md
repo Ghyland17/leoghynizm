@@ -1,6 +1,6 @@
-# Panduan Pasang di Hostinger — FES Emergency Report v2.0 (dengan database)
+# Panduan Pasang di Hostinger — FES Emergency Report v2.1 (dengan database)
 
-Versi 2.0 terdiri dari dua bagian:
+Versi 2.1 terdiri dari dua bagian:
 - **Website dan aplikasi**: file HTML yang sama seperti sebelumnya.
 - **Backend**: folder `api/`, ditulis dengan PHP 8 dan memakai database MySQL.
 
@@ -33,7 +33,7 @@ Email ini dipakai untuk mengirim kode login dua langkah (Admin FES dan Super Adm
 1. Buat subdomain, misalnya `fes.domainanda.com`, lewat **Domains → Subdomains**.
 2. Aktifkan SSL untuk subdomain itu (**Security → SSL**) dan nyalakan **Force HTTPS**.
 3. Buka **Files → File Manager**, lalu masuk ke folder subdomain tersebut.
-4. Unggah `FES-Hosting-v2.0.zip`, lalu **Extract**.
+4. Unggah `FES-Hosting-v2.1.zip`, lalu **Extract**.
 5. Pindahkan **seluruh isi** folder `fes-web` satu tingkat ke atas.
    - Hasil akhirnya: `index.html`, `app.html`, folder `api/`, dan file lainnya berada langsung di folder subdomain.
    - Aktifkan *Show hidden files* supaya file `.htaccess` ikut terlihat dan ikut dipindahkan.
@@ -66,7 +66,7 @@ File `config.php` tidak bisa dibuka dari browser karena diblokir oleh `.htaccess
 
 - **Web (dashboard dan admin):** `https://fes.domainanda.com/`
 - **Aplikasi HP lewat browser:** `https://fes.domainanda.com/app.html`. Lalu pilih **Instal aplikasi** di Chrome, atau **Tambahkan ke Layar Utama** di Safari iPhone.
-- **Aplikasi Android (APK):** pasang `FES-Report-v2.0.apk`. Saat pertama dibuka, aplikasi menanyakan **alamat server**. Isi `https://fes.domainanda.com`.
+- **Aplikasi Android (APK):** pasang `FES-Report-v2.1.apk`. Saat pertama dibuka, aplikasi menanyakan **alamat server**. Isi `https://fes.domainanda.com`.
 
 **Masuk pertama kali:**
 1. Semua akun memakai kata sandi awal **`Fes12345`**.
@@ -90,6 +90,11 @@ File `config.php` tidak bisa dibuka dari browser karena diblokir oleh `.htaccess
 | ERR | Tim mengajukan ERR. Koordinator menyetujui atau meminta revisi di Dashboard. Laporan yang sudah diajukan terkunci dari perubahan. |
 | Dashboard | Statistik dihitung dari respons asli. Ada panel "Sedang berjalan" dan "ERR menunggu persetujuan". Data diperbarui setiap 30 detik. |
 | Jadwal | Shift, rotasi regu, jam kerja individu, terbitkan jadwal, serta pengajuan tukar jaga, izin, cuti, dan sakit beserta persetujuannya. |
+| Kalender jaga | Tanda Izin, Cuti, atau Sakit dan pengganti per shift tersimpan di server. Tanda ini langsung terlihat di **Jadwal saya** anggota. |
+| Kebutuhan minimum | Jumlah personel minimum per station tersimpan di server dan dipakai untuk peringatan "kurang personel". |
+| Unit kendaraan | Unit bisa ditambah, diubah, dihapus, dan diberi status Siap atau Perbaikan. Unit yang sedang **Perbaikan** tidak muncul di pilihan Dispatch. Status "Sedang respons" dihitung otomatis. |
+| Data master | Response station, lokasi, sumber informasi, dan instansi pendukung bisa diubah dari Admin. Daftar ini langsung dipakai di aplikasi. |
+| Pengaturan sistem | Super Admin bisa mengatur masa berlaku kode email (3–15 menit) dan batas salah kode (3–10 kali). |
 | Log audit | Mencatat siapa melakukan apa dan kapan. Bisa diekspor ke CSV dari halaman Admin. |
 
 ## Cadangan (backup)
@@ -97,6 +102,9 @@ File `config.php` tidak bisa dibuka dari browser karena diblokir oleh `.htaccess
 hPanel membuat backup otomatis (**Files → Backups**). Unduh juga backup database secara berkala lewat **Databases → phpMyAdmin → Export**.
 
 ## Memperbarui versi
+
+Dari v2.0 ke v2.1: unggah ulang semua file, kecuali `api/config.php`. Tabel baru dibuat **otomatis** saat API pertama kali dipanggil, jadi tidak perlu menjalankan `install.php` lagi.
+
 
 1. Unggah ulang file HTML dan folder `api/`. **Jangan timpa `api/config.php`.**
 2. Database tetap aman. Skema hanya dibuat oleh `install.php`, yang sudah Anda hapus.

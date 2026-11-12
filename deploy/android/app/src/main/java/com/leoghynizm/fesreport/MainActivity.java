@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setMediaPlaybackRequiresUserGesture(false);
-        s.setUserAgentString(s.getUserAgentString() + " FESReportApp/2.0");
+        s.setUserAgentString(s.getUserAgentString() + " FESReportApp/2.1");
 
         web.setWebViewClient(new WebViewClient() {
             @Override

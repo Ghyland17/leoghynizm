@@ -139,3 +139,11 @@ CREATE TABLE IF NOT EXISTS audit (
   ip         VARCHAR(45)  NULL,
   KEY ix_audit_at (at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS roster_overrides (
+  k          VARCHAR(40)  NOT NULL PRIMARY KEY,               -- "2026-11-7|P|FOX-5" (tanggal|shift|station)
+  absent     TEXT         NOT NULL,                           -- JSON {"C043177":"Sakit"}
+  extra      TEXT         NOT NULL,                           -- JSON ["C055193"] pengganti
+  updated_by VARCHAR(7)   NOT NULL,
+  updated_at BIGINT       NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

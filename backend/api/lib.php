@@ -196,3 +196,27 @@ function smtp_send(string $to, string $subj, string $headers, string $body): boo
         fclose($fp); return true;
     } catch (Throwable $e) { error_log('FES smtp: ' . $e->getMessage()); fclose($fp); return false; }
 }
+
+/* ================= defaults & upgrades ================= */
+const DEFAULT_UNITS = [['k' => 'FS R6', 'type' => 'Rescue Tender', 'st' => 'FOX-5', 'status' => 'Siap'], ['k' => 'FS E8', 'type' => 'Fire Engine', 'st' => 'FOX-5', 'status' => 'Siap'],
+                       ['k' => 'EMS6', 'type' => 'Ambulans', 'st' => 'FOX-4', 'status' => 'Siap'], ['k' => 'FS R4', 'type' => 'Rescue Tender', 'st' => 'FOX-3', 'status' => 'Siap']];
+const DEFAULT_MASTER = [
+    'station' => ['FIRE STATION FAP FOX-5', 'FIRST AID STATION FOX-4', 'OPS. CAMP FOX-3', 'GROUND TRAINING DOJO', 'CONSTRUCTION OFFICE FOX-2', 'ON CALL', 'CO/MGH', 'NAR'],
+    'lokasi' => ['Camp Tetenggala', 'Camp Manado', 'MCO', 'Main Gate', 'Dormi / FOX-4', 'Camp Pad PAMA', 'Ground Training DOJO', 'Gate NAR', 'Construction Office', 'Desa Watalara', 'Desa Silea', 'Puulemo'],
+    'sumber' => ['ERT Coordinator', 'Radio', 'Telepon', 'Security', 'Masyarakat'],
+    'instansi' => ['BPBD Kolaka', 'Damkar Kolaka', 'Puskesmas', 'Polsek']];
+const DEFAULT_MIN = ['FOX-5' => 3, 'FOX-4' => 3, 'FOX-3' => 3, 'FOX-2' => 2];
+const DEFAULT_SYSTEM = ['otp_minutes' => 5, 'otp_tries' => 5, 'min_app_version' => '2.0.0'];
+const SCHEMA_VERSION = 2;
+/** Brings an older database up to date (new tables only; never drops data). */
+function migrate(): void {
+    $v = (int) (setting('schema_version', 1));
+    if ($v >= SCHEMA_VERSION) return;
+    $sql = preg_replace('/--[^\n]*/', '', file_get_contents(__DIR__ . '/schema.sql'));
+    foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) if (stripos($stmt, 'CREATE TABLE IF NOT EXISTS') === 0) db()->exec($stmt);
+    $cols = array_column(rows('SHOW COLUMNS FROM users'), 'Field');
+    if (!in_array('birth', $cols, true)) db()->exec('ALTER TABLE users ADD COLUMN birth VARCHAR(10) NULL AFTER blood');
+    set_setting('schema_version', SCHEMA_VERSION);
+}
+function sys_setting(string $k): int { $s = setting('system', []) ?: []; $v = (int) ($s[$k] ?? DEFAULT_SYSTEM[$k]);
+    return $k === 'otp_minutes' ? max(3, min(15, $v)) : max(3, min(10, $v)); }

@@ -34,6 +34,7 @@ $path = '/' . trim(preg_replace('#^/index\.php#', '', $path), '/');
 if ($method !== 'GET' && $method !== 'DELETE' && !str_starts_with((string) ($_SERVER['CONTENT_TYPE'] ?? ''), 'application/json'))
     fail(415, 'json_only', 'Gunakan Content-Type application/json.');
 
+if (!str_ends_with($path, '/health')) migrate();
 $R = [];
 function route(string $m, string $p, callable $f): void { global $R; $R[] = [$m, '#^' . preg_replace('#\{(\w+)\}#', '(?P<$1>[^/]+)', $p) . '$#', $f]; }
 
@@ -72,9 +73,9 @@ function start_otp(array $u, string $kind, string $client): array {
     $code = (string) random_int(100000, 999999); $id = bin2hex(random_bytes(16)); $now = ms();
     q('DELETE FROM otp_flows WHERE user_id=? AND kind=?', [$u['id'], $kind]);
     q('INSERT INTO otp_flows (id,user_id,kind,code_hash,expires_at,resend_at,client,created_at) VALUES (?,?,?,?,?,?,?,?)',
-      [$id, $u['id'], $kind, password_hash($code, PASSWORD_DEFAULT), $now + 300000, $now + 60000, $client, $now]);
+      [$id, $u['id'], $kind, password_hash($code, PASSWORD_DEFAULT), $now + sys_setting('otp_minutes') * 60000, $now + 60000, $client, $now]);
     otp_mail($u, $kind, $code);
-    return ['flow' => $id, 'email' => mask_email($u['email']), 'expires_at' => $now + 300000, 'resend_at' => $now + 60000];
+    return ['flow' => $id, 'email' => mask_email($u['email']), 'expires_at' => $now + sys_setting('otp_minutes') * 60000, 'resend_at' => $now + 60000, 'minutes' => sys_setting('otp_minutes'), 'tries' => sys_setting('otp_tries')];
 }
 function otp_mail(array $u, string $kind, string $code): void {
     $what = $kind === '2fa' ? 'masuk (login dua langkah)' : 'mengatur ulang kata sandi';
@@ -94,9 +95,9 @@ route('POST', '/auth/otp/resend', function () {
     rate('otp-send:' . $f['user_id'], 6, 3600);
     $u = row('SELECT * FROM users WHERE id=?', [$f['user_id']]);
     $code = (string) random_int(100000, 999999);
-    q('UPDATE otp_flows SET code_hash=?, tries=0, expires_at=?, resend_at=? WHERE id=?', [password_hash($code, PASSWORD_DEFAULT), $now + 300000, $now + 60000, $f['id']]);
+    q('UPDATE otp_flows SET code_hash=?, tries=0, expires_at=?, resend_at=? WHERE id=?', [password_hash($code, PASSWORD_DEFAULT), $now + sys_setting('otp_minutes') * 60000, $now + 60000, $f['id']]);
     otp_mail($u, $f['kind'], $code);
-    out(['ok' => true, 'expires_at' => $now + 300000, 'resend_at' => $now + 60000, 'email' => mask_email($u['email'])]);
+    out(['ok' => true, 'expires_at' => $now + sys_setting('otp_minutes') * 60000, 'resend_at' => $now + 60000, 'email' => mask_email($u['email'])]);
 });
 route('POST', '/auth/otp/verify', function () {
     $b = body(); $f = load_flow($b); $code = preg_replace('/\D/', '', (string) ($b['code'] ?? '')); $now = ms();
@@ -104,9 +105,10 @@ route('POST', '/auth/otp/verify', function () {
     if (!$f['code_hash']) fail(410, 'cancelled', 'Kode dibatalkan karena terlalu banyak salah. Tekan Kirim ulang.');
     if (strlen($code) !== 6 || !password_verify($code, $f['code_hash'])) {
         $t = $f['tries'] + 1;
-        if ($t >= 5) { q('UPDATE otp_flows SET tries=?, code_hash=NULL, resend_at=0 WHERE id=?', [$t, $f['id']]); fail(401, 'cancelled', 'Kode salah 5 kali. Kode dibatalkan.', ['tries' => $t]); }
+        $max = sys_setting('otp_tries');
+        if ($t >= $max) { q('UPDATE otp_flows SET tries=?, code_hash=NULL, resend_at=0 WHERE id=?', [$t, $f['id']]); fail(401, 'cancelled', "Kode salah $max kali. Kode dibatalkan.", ['tries' => $t, 'max' => $max]); }
         q('UPDATE otp_flows SET tries=? WHERE id=?', [$t, $f['id']]);
-        fail(401, 'bad_code', 'Kode salah.', ['tries' => $t]);
+        fail(401, 'bad_code', 'Kode salah.', ['tries' => $t, 'max' => $max]);
     }
     $u = row('SELECT * FROM users WHERE id=?', [$f['user_id']]);
     if (!$u || $u['status'] !== 'active') fail(403, 'inactive', 'Akun tidak aktif.');
@@ -202,7 +204,7 @@ function validate_member(array $b, array $me, ?array $target): array {
     if (array_key_exists('rk', $b)) { $o['rk'] = (string) $b['rk']; if (!in_array($o['rk'], ROLES, true)) fail(422, 'invalid', 'Peran tidak dikenal.', ['field' => 'rk']);
         if ($me['rk'] !== 'super' && in_array($o['rk'], ['admin', 'super'], true)) fail(403, 'forbidden', 'Hanya Super Admin yang dapat memberi peran Admin atau Super Admin.'); }
     if (array_key_exists('squad', $b)) { $o['squad'] = $b['squad'] === null || $b['squad'] === '' ? null : (string) $b['squad']; if ($o['squad'] !== null && !in_array($o['squad'], SQUADS, true)) fail(422, 'invalid', 'Regu tidak dikenal.', ['field' => 'squad']); }
-    if (array_key_exists('station', $b)) { $o['station'] = str_in($b, 'station', 10, true); }
+    if (array_key_exists('station', $b)) { $o['station'] = str_in($b, 'station', 10, true); if (!preg_match('/^FOX-\d$/', $o['station'])) fail(422, 'invalid', 'Station tidak valid.', ['field' => 'station']); }
     if (array_key_exists('status', $b)) { $o['status'] = $b['status'] === 'disabled' ? 'disabled' : 'active'; }
     if (array_key_exists('hours', $b)) {
         $h = $b['hours'];
@@ -255,9 +257,29 @@ const DEFAULT_SHIFTS = [['k' => 'P', 'name' => 'Pagi', 'start' => '07:00', 'end'
 route('GET', '/roster', function () {
     auth();
     out(['ok' => true, 'shifts' => setting('shifts', DEFAULT_SHIFTS), 'rotation' => setting('rotation', SQUADS), 'anchor' => setting('rotation_anchor', '2026-11-01'),
-         'min' => setting('min_staff', ['FOX-5' => 3, 'FOX-4' => 3, 'FOX-3' => 3, 'FOX-2' => 2]), 'published' => setting('published', new stdClass()),
+         'min' => setting('min_staff', DEFAULT_MIN), 'published' => setting('published', new stdClass()),
+         'units' => units_live(), 'master' => setting('master', DEFAULT_MASTER),
+         'overrides' => array_reduce(rows('SELECT k, absent, extra FROM roster_overrides ORDER BY updated_at DESC LIMIT 5000'),
+                          function ($c, $o) { $c[$o['k']] = ['absent' => json_decode($o['absent'], true) ?: new stdClass(), 'extra' => json_decode($o['extra'], true) ?: []]; return $c; }, []) ?: new stdClass(),
          'members' => array_map(fn($u) => ['id' => $u['id'], 'name' => $u['name'], 'rk' => $u['rk'], 'squad' => $u['squad'], 'station' => $u['station'], 'hours' => $u['hours'] ? json_decode($u['hours'], true) : null],
                                 rows("SELECT id,name,rk,squad,station,hours FROM users WHERE status='active' AND rk IN ('crew','tl') ORDER BY squad, rk DESC, name"))]);
+});
+function units_live(): array {
+    $busy = [];
+    foreach (rows("SELECT data FROM incidents WHERE phase IN ('enroute','onscene','returning')") as $i) foreach ((array) ((json_decode($i['data'], true) ?: [])['units'] ?? []) as $k) $busy[(string) $k] = true;
+    return array_map(fn($u) => $u + ['live' => isset($busy[$u['k']]) ? 'Sedang respons' : $u['status']], setting('units', DEFAULT_UNITS));
+}
+route('PUT', '/roster/overrides', function () {
+    $me = auth(['admin', 'super']); $b = body(); $k = (string) ($b['k'] ?? '');
+    if (!preg_match('/^\d{4}-\d{1,2}-\d{1,2}\|[A-Z]\|FOX-\d$/', $k)) fail(422, 'invalid', 'Kunci jadwal tidak valid.');
+    $ids = array_column(rows("SELECT id FROM users WHERE status='active'"), 'id'); $absent = []; $extra = [];
+    foreach ((array) ($b['absent'] ?? []) as $id => $why) { if (in_array($id, $ids, true) && in_array($why, ['Izin', 'Cuti', 'Sakit'], true)) $absent[$id] = $why; }
+    foreach ((array) ($b['extra'] ?? []) as $id) { if (in_array($id, $ids, true) && !in_array($id, $extra, true)) $extra[] = $id; }
+    q('DELETE FROM roster_overrides WHERE k=?', [$k]);
+    if ($absent || $extra) q('INSERT INTO roster_overrides (k, absent, extra, updated_by, updated_at) VALUES (?,?,?,?,?)', [$k, json_encode($absent ?: new stdClass()), json_encode($extra), $me['id'], ms()]);
+    [$day, $sh, $st] = explode('|', $k);
+    audit($me, "Mengubah jadwal $day shift $sh $st: " . ($absent ? implode(', ', array_map(fn($i, $w) => "$i $w", array_keys($absent), $absent)) : 'semua jaga') . ($extra ? '; pengganti ' . implode(', ', $extra) : ''));
+    out(['ok' => true, 'k' => $k, 'absent' => $absent ?: new stdClass(), 'extra' => $extra]);
 });
 route('PUT', '/roster/shifts', function () {
     $me = auth(['admin', 'super']); $s = body()['shifts'] ?? null;
@@ -279,7 +301,7 @@ route('PUT', '/roster/shifts', function () {
 route('PUT', '/roster/published', function () {
     $me = auth(['admin', 'super']); $b = body(); $m = (string) ($b['month'] ?? '');
     if (!preg_match('/^\d{4}-\d{2}$/', $m)) fail(422, 'invalid', 'Bulan tidak valid.');
-    $p = setting('published', []); $p[$m] = !empty($b['published']) ? 'Terbit' : 'Draf'; set_setting('published', $p);
+    $p = setting('published', []); $p[$m] = !empty($b['published']) ? 'Terbit' : 'Draft'; set_setting('published', $p);
     audit($me, ($p[$m] === 'Terbit' ? 'Menerbitkan' : 'Menarik') . " jadwal $m");
     out(['ok' => true, 'published' => $p]);
 });
@@ -436,17 +458,47 @@ route('GET', '/dashboard', function () {
 });
 
 /* =================================================================== PENGATURAN & LOG */
-const SETTING_KEYS = ['rules', 'report_format', 'recipients', 'min_staff', 'units', 'system'];
-route('GET', '/settings', function () { auth(['admin', 'super', 'koord']); $o = []; foreach (SETTING_KEYS as $k) $o[$k] = setting($k); out(['ok' => true, 'settings' => $o]); });
+const SETTING_KEYS = ['rules', 'report_format', 'recipients', 'min_staff', 'units', 'system', 'master'];
+function clean_setting(string $k, $v) {
+    $str = fn($x, $n) => is_string($x) && trim($x) !== '' && mb_strlen(trim($x)) <= $n;
+    switch ($k) {
+        case 'min_staff': if (!is_array($v)) return null; $o = [];
+            foreach ($v as $st => $n) { if (!preg_match('/^FOX-\d$/', (string) $st) || !is_numeric($n) || $n < 1 || $n > 50) return null; $o[$st] = (int) $n; } return $o;
+        case 'units': if (!is_array($v) || count($v) > 60) return null; $o = []; $seen = [];
+            foreach (array_values($v) as $u) { if (!is_array($u) || !$str($u['k'] ?? null, 12) || !$str($u['type'] ?? null, 40) || !preg_match('/^FOX-\d$/', (string) ($u['st'] ?? ''))) return null;
+                $kk = mb_strtoupper(trim($u['k'])); if (isset($seen[$kk])) return null; $seen[$kk] = 1;
+                $o[] = ['k' => trim($u['k']), 'type' => trim($u['type']), 'st' => $u['st'], 'status' => ($u['status'] ?? '') === 'Perbaikan' ? 'Perbaikan' : 'Siap']; } return $o;
+        case 'master': if (!is_array($v)) return null; $o = [];
+            foreach (['station', 'lokasi', 'sumber', 'instansi'] as $g) { $list = $v[$g] ?? DEFAULT_MASTER[$g]; if (!is_array($list) || count($list) > 100 || !$list) return null;
+                $o[$g] = []; foreach ($list as $x) { if (!$str($x, 80)) return null; if (!in_array(trim($x), $o[$g], true)) $o[$g][] = trim($x); } } return $o;
+        case 'recipients': if (!is_array($v) || count($v) > 10) return null;
+            foreach ($v as $x) if (!is_array($x) || count($x) !== 2 || !$str($x[0], 40) || !is_string($x[1]) || mb_strlen($x[1]) > 300) return null; return array_values($v);
+        case 'system': if (!is_array($v)) return null;
+            $m = (int) ($v['otp_minutes'] ?? 0); $t = (int) ($v['otp_tries'] ?? 0); $ver = (string) ($v['min_app_version'] ?? '');
+            if ($m < 3 || $m > 15 || $t < 3 || $t > 10 || !preg_match('/^\d+\.\d+\.\d+$/', $ver)) return null; return ['otp_minutes' => $m, 'otp_tries' => $t, 'min_app_version' => $ver];
+        case 'rules': if (!is_array($v)) return null; $o = [];
+            foreach (['prelim' => [5, 120], 'focus' => [5, 120], 'approve' => [1, 240]] as $kk => [$lo, $hi]) { $n = (int) ($v[$kk] ?? 0); if ($n < $lo || $n > $hi) return null; $o[$kk] = $n; }
+            $o['photo'] = !empty($v['photo']); return $o;
+        case 'report_format': return is_string($v) && str_contains($v, '{NNN}') && mb_strlen($v) <= 40 && preg_match('#^[A-Za-z0-9/{}._-]+$#', $v) ? $v : null;
+    }
+    return null;
+}
+route('GET', '/settings', function () { auth(['admin', 'super', 'koord']); $o = []; foreach (SETTING_KEYS as $k) $o[$k] = setting($k);
+    $o['units'] = units_live(); $o['master'] = $o['master'] ?: DEFAULT_MASTER; $o['min_staff'] = $o['min_staff'] ?: DEFAULT_MIN; $o['system'] = ($o['system'] ?: []) + DEFAULT_SYSTEM;
+    out(['ok' => true, 'settings' => $o, 'mail_from' => (string) cfg('mail_from', ''), 'mail_driver' => (string) cfg('mail_driver', 'mail')]); });
 route('PUT', '/settings/{key}', function ($a) {
     $me = auth(['admin', 'super']); $k = $a['key'];
     if (!in_array($k, SETTING_KEYS, true)) fail(404, 'not_found', 'Pengaturan tidak dikenal.');
     if ($k === 'system' && $me['rk'] !== 'super') fail(403, 'forbidden', 'Hanya Super Admin yang dapat mengubah pengaturan sistem.');
-    $v = body()['value'] ?? null; $j = json_encode($v);
-    if ($v === null || strlen((string) $j) > 20000) fail(422, 'invalid', 'Nilai pengaturan tidak valid.');
-    if ($k === 'report_format' && (!is_string($v) || !str_contains($v, '{NNN}') || mb_strlen($v) > 40)) fail(422, 'invalid', 'Format nomor wajib memuat {NNN}.');
+    $raw = body()['value'] ?? null;
+    if ($raw === null || strlen((string) json_encode($raw)) > 20000) fail(422, 'invalid', 'Nilai pengaturan tidak valid.');
+    $v = clean_setting($k, $raw);
+    if ($v === null) fail(422, 'invalid', match ($k) { 'report_format' => 'Format nomor wajib memuat {NNN}, maksimal 40 karakter, tanpa spasi.',
+        'units' => 'Data unit tidak valid: kode unit (maks 12 karakter) wajib unik, jenis wajib diisi, station FOX-1 sampai FOX-9.',
+        'min_staff' => 'Kebutuhan minimum harus angka 1 sampai 50.', 'system' => 'Masa berlaku kode 3–15 menit, batas salah 3–10 kali, versi berformat 1.0.0.',
+        'rules' => 'Batas waktu di luar rentang yang diizinkan.', default => 'Isian tidak valid atau ada yang kosong.' });
     set_setting($k, $v); audit($me, "Mengubah pengaturan $k");
-    out(['ok' => true]);
+    out(['ok' => true, 'value' => $v]);
 });
 route('GET', '/audit', function () {
     auth(['admin', 'super']); $lim = max(1, min(500, (int) ($_GET['limit'] ?? 200)));

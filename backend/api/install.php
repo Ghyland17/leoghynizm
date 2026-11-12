@@ -31,6 +31,7 @@ elseif (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 }
                 set_setting('rules', ['prelim' => 15, 'focus' => 15, 'approve' => 24, 'photo' => true]);
                 set_setting('report_format', 'ESS/Pom/{NNN}/{MM}/{YYYY}');
+                set_setting('schema_version', SCHEMA_VERSION);
                 audit(null, 'Database dipasang');
             }
             file_put_contents($lock, date('c'));
