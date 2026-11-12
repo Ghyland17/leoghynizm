@@ -1,0 +1,9 @@
+<resources>
+    <color name="fes_bg">#0B0D10</color>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:statusBarColor">@color/fes_bg</item>
+        <item name="android:navigationBarColor">@color/fes_bg</item>
+        <item name="android:colorAccent">#EB6834</item>
+    </style>
+</resources>
