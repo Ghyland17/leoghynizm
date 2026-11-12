@@ -7,8 +7,8 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.4 (Draft – menu Jadwal saya di aplikasi anggota) |
-| Tanggal | 5 November 2026 |
+| Versi dokumen | 1.5 (Draft – peran & akses baru, login & keamanan, pengaturan akun) |
+| Tanggal | 12 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
 > **Catatan:** Bagian bertanda **[ASUMSI]** adalah perkiraan penulis karena informasinya belum tersedia. Mohon diverifikasi oleh tim FES.
@@ -59,18 +59,29 @@ Saat ini tim Fire Emergency & Service (FES) PT Vale Indonesia membuat laporan re
 
 ### 3.1 Peran pengguna
 
-| Peran | Siapa (usulan) | Yang bisa dilakukan | Platform |
+| Peran | Siapa | Yang bisa dilakukan | Platform |
 |---|---|---|---|
-| **Crew FES** | Anggota regu | Mencatat tahapan saat ditunjuk, foto, catatan, menandai personel tiba | Mobile |
-| **Team Leader** | Komandan regu yang bertugas | Semua hak Crew + Dispatch Call, mengisi Target Time, mengirim Preliminary, mengajukan ERR | Mobile |
-| **Supervisor** | Supervisor / Koordinator FES | Memantau respons live, mereview dan **menyetujui ERR**, melihat dashboard | Web + Mobile |
-| **Admin FES** | **Koordinator atau Superintendent FES**, dibantu 1 staf admin FES sebagai cadangan | Mengelola anggota, regu & jadwal jaga, master data, template, aturan respons, penerima laporan | Web |
-| **Super Admin** | **Tim IT PT Vale** (1–2 orang) | Pengaturan sistem: keamanan, SSO, retensi data, backup, hak Admin FES. Tidak mengurus data respons sehari-hari | Web |
-| **Viewer** | Manajemen, HSE | Melihat dashboard dan arsip (hanya baca) | Web |
+| **Tim FES** (Crew) | Anggota regu FES Pomalaa | Mencatat tahapan respons saat ditunjuk, foto, catatan, menandai personel tiba, melihat Jadwal saya | Aplikasi HP |
+| **Team Leader** | Komandan regu yang bertugas (4 orang: satu per regu) | Semua hak Tim FES + Dispatch Call, mengisi Target Time, mengirim Preliminary, mengajukan ERR, **melihat dashboard** | Aplikasi HP + web |
+| **Koordinator FES** | Deri Nurjaya Putra | **Melihat dashboard** (web dan aplikasi). **Tidak bisa** memakai fitur respons darurat | Web + aplikasi HP |
+| **Admin FES** | Okky Nurhamni Muda | Mengatur regu & jadwal jaga, unit, master data, template, aturan respons, penerima laporan; mengubah regu/peran anggota (terbatas, lihat 5.12); **melihat dashboard hanya baca** (tanpa unduh data) | Web (dashboard juga di aplikasi) |
+| **Super Admin (IT)** | Eghy Agus Rinaldi | **Satu-satunya yang bisa menambah akun.** Pengaturan sistem & keamanan, hak Admin FES, semua halaman admin, **melihat dashboard** | Web (dashboard juga di aplikasi) |
 
-**[USULAN, mohon konfirmasi]** Admin FES dipegang pemilik proses (FES), bukan IT, supaya perubahan anggota dan master data tidak menunggu tiket IT. IT cukup sebagai Super Admin.
+Peran **Supervisor** dan **Viewer** dari versi sebelumnya **dihapus**. Pemantauan lewat dashboard sekarang dilakukan Team Leader, Koordinator, Admin FES, dan Super Admin.
 
-Satu orang bisa punya lebih dari satu peran (misalnya Supervisor sekaligus Admin FES). Hak akses mengikuti gabungan perannya.
+**Matriks akses**
+
+| Peran | Respons darurat (aplikasi) | Dashboard | Unduh data dashboard | Halaman admin | Tambah akun |
+|---|---|---|---|---|---|
+| Tim FES | ✅ | ❌ | – | ❌ | ❌ |
+| Team Leader | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Koordinator FES | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Admin FES | ❌ | ✅ hanya baca | ❌ | ✅ | ❌ |
+| Super Admin (IT) | ❌ | ✅ | ✅ | ✅ (termasuk Sistem & keamanan) | ✅ |
+
+Akun yang tidak punya akses ke suatu halaman tetap di halaman masuk dan mendapat pesan yang jelas, misalnya "Dashboard hanya untuk Team Leader, Koordinator, Admin FES, dan Super Admin". Penolakan karena peran tidak dihitung sebagai salah kata sandi.
+
+**Data awal pengguna:** 16 anggota FES Pomalaa dari daftar resmi (nama + BN), terdiri dari 4 Team Leader dan 12 Tim FES, ditambah akun Koordinator, Admin FES, dan Super Admin. Data diimpor oleh Super Admin. Pembagian regu masih perlu dikonfirmasi (pertanyaan terbuka #23).
 
 ### 3.2 Persona
 
@@ -79,7 +90,7 @@ Satu orang bisa punya lebih dari satu peran (misalnya Supervisor sekaligus Admin
 - Saat respons, kedua tangannya sering sibuk dan ia memakai sarung tangan APD.
 - Kebutuhan: **sesedikit mungkin interaksi dengan HP**, tombol besar, dan satu ketukan per tahapan.
 
-**Persona 2: Rina, Supervisor FES**
+**Persona 2: Rina, Koordinator FES** *(sebelumnya Supervisor; persona contoh)*
 - Bertugas menyerahkan laporan ke manajemen dan departemen HSE.
 - Kebutuhan: laporan **cepat jadi, akurat, dan format standar**, serta dapat diekspor ke PDF/Excel.
 
@@ -98,13 +109,13 @@ Satu orang bisa punya lebih dari satu peran (misalnya Supervisor sekaligus Admin
 | US-04 | Petugas | mengambil foto evidence langsung dari aplikasi | foto otomatis tersimpan dengan waktu dan koordinat GPS | Must |
 | US-05 | Team Leader | mengisi data singkat kejadian (jenis, lokasi, korban) | Preliminary Report bisa langsung dibuat | Must |
 | US-06 | Team Leader | menekan **"Leave Scene / Case Closed"** lalu **"Return to Stn"** saat tiba di fire station | respons resmi ditutup dan ERR draft dibuat otomatis | Must |
-| US-07 | Supervisor | menerima notifikasi saat Preliminary Report siap | saya bisa segera meneruskannya ke manajemen | Must |
-| US-08 | Supervisor | mereview, mengedit, dan menyetujui ERR | laporan final sesuai standar perusahaan | Must |
-| US-09 | Supervisor | mengekspor laporan ke PDF dan Excel | saya bisa mengirimnya sesuai format yang berlaku | Must |
+| US-07 | Koordinator | menerima notifikasi saat Preliminary Report siap | saya bisa segera meneruskannya ke manajemen | Must |
+| US-08 | Koordinator | mereview, mengedit, dan menyetujui ERR | laporan final sesuai standar perusahaan | Must |
+| US-09 | Koordinator | mengekspor laporan ke PDF dan Excel | saya bisa mengirimnya sesuai format yang berlaku | Must |
 | US-10 | Manajemen | melihat dashboard statistik respons yang bisa dipecah per jenis respons (FIRE, ALARM, MVA, RESCUE, HAZMAT, OIL SPILL, MEDICAL) | saya bisa mengevaluasi kinerja tim untuk tiap jenis kejadian | Should |
-| US-11 | Supervisor | mencari arsip kejadian berdasarkan tanggal, jenis, dan lokasi | data historis mudah ditemukan | Must |
+| US-11 | Koordinator | mencari arsip kejadian berdasarkan tanggal, jenis, dan lokasi | data historis mudah ditemukan | Must |
 | US-12 | Petugas | tetap bisa mencatat tahapan saat sinyal hilang | data tidak hilang ketika berada di area tanpa sinyal | Must |
-| US-13 | Supervisor | melihat posisi tim yang sedang respons di peta | saya bisa memantau tanpa harus berada di lapangan | Should |
+| US-13 | Koordinator | melihat posisi tim yang sedang respons di peta | saya bisa memantau tanpa harus berada di lapangan | Should |
 | US-14 | Admin | mengelola akun petugas, unit kendaraan, dan pos | master data selalu terbarui | Must |
 | US-15 | Team Leader | layar otomatis menampilkan peta penuh dan data respons inti saat HP tidak disentuh | progres respons terbaca sekilas tanpa membuka menu, misalnya saat HP terpasang di dashboard kendaraan | Should |
 | US-16 | Petugas | mendapat notifikasi singkat setiap kali menekan tombol atau menyimpan data | yakin tindakan sudah tercatat, atau tahu apa yang perlu diperbaiki | Must |
@@ -141,7 +152,7 @@ Daftar tahapan tambahan **bisa dikonfigurasi Admin** sesuai SOP FES dan jenis re
 - Tombol berukuran besar (minimal 1/3 layar) dan kontras tinggi agar **bisa ditekan dengan sarung tangan**.
 - Tahapan berjalan berurutan. Tahapan yang tidak relevan dapat **dilewati** dengan konfirmasi.
 - Ada fitur **Undo** dalam 10 detik bila tombol tertekan tidak sengaja.
-- Setiap koreksi waktu setelah undo hanya boleh dilakukan Team Leader/Supervisor dan **tercatat di log audit** (nilai lama, nilai baru, siapa, dan kapan).
+- Setiap koreksi waktu setelah undo hanya boleh dilakukan Team Leader/Koordinator dan **tercatat di log audit** (nilai lama, nilai baru, siapa, dan kapan).
 - Layar menampilkan: tahapan saat ini, stopwatch sejak berangkat, jarak tempuh berjalan, dan peta mini.
 - Satu kejadian dapat diikuti **lebih dari satu unit**. Setiap unit memiliki timeline sendiri yang digabung dalam satu laporan kejadian.
 
@@ -161,7 +172,7 @@ Daftar tahapan tambahan **bisa dikonfigurasi Admin** sesuai SOP FES dan jenis re
 - Foto dikaitkan ke tahapan saat diambil (misalnya "Tiba di TKP" atau "Api Padam").
 - Bisa diberi keterangan singkat (opsional, juga lewat **input suara**).
 - Foto dikompresi sebelum diunggah dan **antre unggah otomatis** saat offline.
-- Foto yang sudah diunggah **tidak bisa dihapus** oleh petugas (hanya ditandai "tidak dipakai" oleh Supervisor) untuk menjaga integritas evidence.
+- Foto yang sudah diunggah **tidak bisa dihapus** oleh petugas (hanya ditandai "tidak dipakai" oleh Koordinator) untuk menjaga integritas evidence.
 
 ### 5.4 Preliminary Report Otomatis
 
@@ -177,7 +188,7 @@ Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Prelimi
 - Target terkirim **≤ 15 menit setelah tiba di TKP** (disetujui FES; bisa diatur Admin).
 - Laporan bisa dikirim ulang sebagai **UPDATE 1, 2, 3…** bila situasi berubah (misalnya korban bertambah atau api terkendali). Setiap update menyimpan versi sebelumnya.
 - Nomor laporan **sama dengan nomor ERR** (format 5.5.2), sehingga Preliminary dan ERR satu kejadian saling terhubung.
-- Dikirim sebagai notifikasi + PDF ke daftar distribusi yang diatur Admin (default: Supervisor FES, ERT Coordinator, HSE Department, Manajemen Area). Sebelum dikirim, Team Leader menandatanganinya secara digital.
+- Dikirim sebagai notifikasi + PDF ke daftar distribusi yang diatur Admin (default: Koordinator FES, ERT Coordinator, HSE Department, Manajemen Area). Sebelum dikirim, Team Leader menandatanganinya secara digital.
 
 **Isi form & sumber data** (Auto = otomatis, Master = pilih dari master data, Input = diisi petugas)
 
@@ -209,7 +220,7 @@ Template Excel: [`templates/Preliminary_Report_Template.xlsx`](templates/Prelimi
 - Draft ERR dibuat otomatis saat **"Return to Stn"** ditekan (tim tiba kembali di fire station).
 - Seluruh data timeline, GPS, foto, kru, dan unit **terisi otomatis**.
 - Kolom yang perlu dilengkapi manual: kronologi, penyebab dugaan, tindakan yang dilakukan, peralatan/APAR/air yang digunakan, kerusakan, korban, rekomendasi, dan lesson learned.
-- **Alur persetujuan:** Draft → Diajukan (Team Leader) → Direview (Supervisor) → **Disetujui (Final)**. Laporan final terkunci dan hanya bisa direvisi dengan versi baru.
+- **Alur persetujuan:** Draft → Diajukan (Team Leader) → Direview (Koordinator) → **Disetujui (Final)**. Laporan final terkunci dan hanya bisa direvisi dengan versi baru.
 - Ekspor ke **PDF** (format resmi dengan logo FES & Vale) dan **Excel** (file `.xlsx` yang **identik dengan form "ERR FORM" saat ini**). Nama file mengikuti pola yang sekarang dipakai: `ERR_<DD-MM-YYYY>_<Lokasi>.xlsx`, contoh `ERR_31-10-2026_Watalara.xlsx`.
 
 #### 5.5.1 Pemetaan field form ERR → sumber data aplikasi
@@ -288,10 +299,17 @@ Dashboard memakai klasifikasi yang sama dengan form ERR:
 - **Sub-jenis** per Response Type. Contoh: Wildland/Structural Fire, Alarm detection/Trouble-False, Motor VS Motor, Confined Space Rescue.
 
 **Filter global** (satu baris di atas, berlaku untuk semua angka dan grafik)
-- Periode: 30 hari, 3 bulan, 12 bulan, atau rentang tanggal sendiri.
+- Periode: tombol **dropdown** (ikon kalender) berisi 30 hari, 3 bulan, 12 bulan, atau rentang tanggal sendiri. Tiap pilihan menyebut pembandingnya; pilihan aktif diberi tanda ✓.
 - Response Type: dropdown dengan ikon per jenis (lonceng ALARM, api FIRE, mobil MVA, pelampung RESCUE, tabung kimia HAZMAT, tetesan OIL SPILL, palang medis MEDICAL) dan jumlah respons tiap jenis. Klik jenis di tabel atau grafik juga mengaktifkan filter ini (*drill-down*).
 - Filter lanjutan (station, incident type), **unduh data**, dan **info data** disimpan di menu **Opsi** yang bisa dibuka dan ditutup, supaya bagian atas dashboard tetap ringkas dan tidak menutupi isi. Tombol Opsi menampilkan jumlah filter lanjutan yang aktif.
 - Response Station dan Incident Type.
+
+**Akses & tampilan dashboard**
+- Bisa dibuka oleh **Team Leader, Koordinator, Admin FES (hanya baca), dan Super Admin**, baik di web maupun **di aplikasi HP dengan tampilan yang sama**.
+- **Admin FES hanya baca:** bagian "Unduh data" di menu Opsi tidak ditampilkan.
+- **Header menempel di atas** saat digulir, dengan ukuran tetap (tidak mengecil atau bergerak). Di HP, judul dibuat ringkas dan tombol Periode, Jenis respons, dan Opsi muat dalam satu baris.
+- Panel "Sedang berjalan" memenuhi satu baris di tablet; seluruh panel rata dengan tepi header.
+- Subjudul header: "Fire & Emergency Services · Kolaka".
 
 **Ringkasan (KPI) sesuai filter**
 - Jumlah respons, dibandingkan periode sebelumnya.
@@ -360,7 +378,7 @@ Merah logo tidak dipakai untuk jenis respons. Merah khusus untuk tombol aksi dan
 
 ### 5.8 Notifikasi
 
-- Push notification ke Supervisor saat: respons dimulai, tim tiba di TKP, Preliminary Report siap, respons ditutup, dan ERR menunggu review.
+- Push notification ke Koordinator saat: respons dimulai, tim tiba di TKP, Preliminary Report siap, respons ditutup, dan ERR menunggu review.
 - **[Fase 2]** Notifikasi melalui email/WhatsApp ke manajemen.
 
 ### 5.9 Umpan Balik & Notifikasi di Aplikasi
@@ -413,54 +431,54 @@ Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode 
 - Selama mode fokus, aplikasi menjaga layar tetap menyala (*screen wake lock*) bila HP mengizinkan. Ini perlu diimbangi pengaturan kecerahan supaya baterai tetap hemat (lihat kebutuhan Baterai).
 - Data di mode fokus diperbarui setiap detik dan tetap berjalan saat tanpa sinyal, karena GPS dan timer berjalan di HP.
 
-### 5.11 Akun & Aktivasi (tidak ada pendaftaran bebas)
+### 5.11 Akun & Login (tidak ada pendaftaran bebas)
 
-Anggota FES **tidak mendaftar sendiri**. Akun dibuat oleh Admin FES, lalu anggota mengaktifkannya di HP masing-masing. Alasannya:
-- Data respons adalah data perusahaan, sedangkan aplikasi dipasang di **HP pribadi**. Hanya orang yang benar-benar anggota FES yang boleh masuk.
-- Peran (Crew, Team Leader, Supervisor) harus ditentukan atasan, bukan dipilih sendiri.
-- Kalau anggota pindah atau keluar, aksesnya bisa dicabut di satu tempat.
+**Pembuatan akun**
+- **Hanya Super Admin (IT)** yang bisa menambah akun, satu per satu atau impor Excel. Tidak ada tombol "Buat akun" maupun "Minta akses" di halaman masuk.
+- Admin FES tidak bisa menambah akun. Admin FES hanya bisa mengubah regu, status, dan peran operasional (Tim FES, Team Leader, Koordinator). Peran **Admin FES dan Super Admin hanya bisa diberikan oleh Super Admin**.
+- Data yang dicatat: BN (ID karyawan), nama, **email pribadi** (untuk kode verifikasi), nomor HP, regu, station, peran.
 
-**Alur aktivasi akun**
+**Halaman masuk** (sama untuk aplikasi HP dan web)
+1. Layar pembuka logo FES, lalu kartu login di tengah layar.
+2. Isi **BN atau email pribadi**, **kata sandi** (dengan ikon mata untuk melihat isian), dan **captcha** 5 karakter. Pilihan "Ingat perangkat ini".
+3. Setelah berhasil, pengguna **langsung masuk ke halaman awal sesuai perannya**, tanpa memilih halaman (lihat 5.15).
 
-```mermaid
-flowchart LR
-  A[Admin FES menambah anggota<br/>termasuk email pribadi] --> B[Sistem kirim kode aktivasi<br/>ke email pribadi]
-  B --> C[Anggota pasang aplikasi<br/>& masukkan ID karyawan + kode]
-  C --> D[Verifikasi OTP<br/>ke email pribadi terdaftar]
-  D --> E[Buat PIN 6 digit<br/>+ aktifkan sidik jari/wajah]
-  E --> F[Setujui kebijakan privasi<br/>& izin lokasi, kamera, notifikasi]
-  F --> G[Tur singkat 1 menit<br/>lalu siap dipakai]
-```
-
-1. **Admin FES menambah anggota**: ID karyawan, nama, **email pribadi**, nomor HP (untuk kontak), regu, station, dan peran. Bisa satu per satu atau impor dari Excel.
-2. **Sistem mengirim kode aktivasi ke email pribadi anggota** (berlaku 72 jam), beserta tautan unduh aplikasi.
-3. **Anggota memasang aplikasi**, memasukkan ID karyawan dan kode aktivasi.
-4. **Verifikasi OTP ke email pribadi** yang terdaftar, supaya kode aktivasi yang bocor tidak bisa dipakai orang lain.
-5. **Membuat PIN 6 digit** dan, bila HP mendukung, mengaktifkan sidik jari/wajah untuk login cepat.
-6. **Menyetujui kebijakan privasi** (GPS hanya aktif saat respons) dan memberi izin lokasi, kamera, dan notifikasi.
-7. **Tur singkat** cara memakai tombol respons, lalu akun aktif. Admin FES melihat status "Aktif" di daftar anggota.
-
-**Pengiriman kode lewat email pribadi**
-
-Email pribadi (misalnya Gmail) hanya dipakai sebagai **saluran pengiriman kode**, bukan kunci akun. Yang menentukan seseorang boleh masuk tetap Admin FES. Pilihan ini dipakai karena gratis, cepat disiapkan, dan tidak bergantung pada kebijakan email kantor di HP pribadi.
-
-| Risiko | Pengaman |
+**Aturan login**
+| Aturan | Ketentuan |
 |---|---|
-| Alamat salah ketik atau bukan milik anggota | Alamat dicatat Admin FES, bukan diisi sendiri. Kode aktivasi yang diterima sekaligus membuktikan email itu benar milik anggota |
-| Keamanan email pribadi beragam | Kode saja tidak cukup untuk masuk: tetap perlu **ID karyawan + PIN**, dan akun terikat ke satu HP. OTP berlaku **5 menit**, maksimal **5 kali salah**, lalu dikunci 15 menit |
-| Anggota keluar tapi emailnya masih aktif | Akses tidak bergantung pada email. Akun yang dinonaktifkan Admin tidak bisa diaktifkan lagi dengan kode apa pun |
-| Permintaan kode untuk HP baru oleh orang lain | Login dari HP baru memicu notifikasi ke HP lama dan ke Admin FES. Admin bisa mewajibkan persetujuan manual |
-| Email masuk spam atau ada email palsu | Dikirim dari domain resmi perusahaan dengan SPF/DKIM/DMARC. Isi email hanya kode tanpa tautan login. Admin bisa menampilkan **kode/QR cadangan** di halaman Anggota untuk dipindai langsung di station |
-| Email pribadi termasuk data pribadi | Hanya dipakai untuk keperluan akun, dengan persetujuan anggota saat aktivasi, sesuai UU Pelindungan Data Pribadi (UU 27/2022). Mengganti alamat email hanya lewat Admin FES |
+| Format ID | BN = huruf C diikuti 6 angka. Format salah langsung dijelaskan (jumlah karakter, spasi) |
+| Captcha | Wajib setiap login dan Lupa kata sandi; berganti setiap kali salah. Versi produksi memakai captcha dari server (misalnya Cloudflare Turnstile) |
+| Salah kata sandi | Pesan: "ID atau kata sandi salah" + sisa percobaan + tips (spasi, huruf besar/kecil, Caps Lock, Lupa kata sandi). Pesan sengaja tidak menyebut bagian mana yang salah, supaya ID terdaftar tidak bisa ditebak |
+| Kunci akun | **5 kali salah → akun itu dikunci 15 menit** (akun lain di perangkat yang sama tetap bisa masuk). Kunci dibuka otomatis setelah kata sandi direset |
+| Caps Lock | Peringatan muncul saat mengetik kata sandi |
+
+**Lupa kata sandi**
+1. Isi BN/email + captcha → kode 6 digit dikirim ke email pribadi (disamarkan, misalnya `ra•••k@gmail.com`).
+2. Masukkan kode: berlaku **5 menit**, kirim ulang setelah 60 detik, **maksimal 5 kali salah** lalu kode dibatalkan dan harus minta kode baru. Pesan salah menjelaskan percobaan ke berapa dan tipsnya.
+3. Buat kata sandi baru sesuai aturan kata sandi. Semua sesi di perangkat lain dikeluarkan.
+
+**Login dua langkah (Admin FES & Super Admin)**
+- Setelah kata sandi benar, kode 6 digit dikirim ke email pribadi dan harus dimasukkan. Alasannya: akun ini bisa mengubah data akun dan jadwal, sehingga kata sandi yang bocor saja tidak cukup untuk masuk.
+- Pilihan **"Percayai perangkat ini selama 30 hari"** supaya kode tidak diminta lagi di perangkat itu (tidak boleh dicentang di komputer bersama). Tanda perangkat tepercaya ditandatangani sehingga tidak bisa dipalsukan.
+- Tim FES, Team Leader, dan Koordinator **tidak** memakai login dua langkah, supaya aplikasi cepat dibuka saat darurat.
+
+**Sesi**
+| Tempat | Aturan |
+|---|---|
+| **Aplikasi HP** | **Cukup login sekali.** Aplikasi langsung terbuka setiap kali dipakai sampai pengguna menekan **Keluar**. Sesi juga berakhir bila kata sandi diganti di perangkat lain atau akun dinonaktifkan Super Admin |
+| **Web** | Keluar otomatis setelah **15 menit tanpa aktivitas**, dengan peringatan 1 menit sebelumnya ("Tetap masuk" / "Keluar sekarang"), karena web sering dibuka di komputer kantor bersama |
+
+**Aturan kata sandi**
+- Minimal 8 karakter, ada huruf dan angka, ada huruf besar, tidak memuat BN, dan berbeda dari kata sandi lama.
+- Pengukur kekuatan dan daftar syarat tercentang langsung saat mengetik.
+- Disimpan hanya sebagai **hash** (lihat 7B), tidak pernah dalam bentuk asli.
 
 **Aturan akun**
-- **Satu akun, satu HP aktif.** Ganti HP harus diaktifkan ulang (kode baru dari Admin FES atau OTP ke email pribadi).
-- **Lupa PIN:** reset sendiri lewat OTP ke email pribadi terdaftar. Kalau email juga berganti, minta Admin FES.
-- **Pindah regu/peran:** diubah Admin FES dan langsung berlaku tanpa login ulang.
-- **Keluar dari FES atau HP hilang:** Admin FES menonaktifkan akun. Sesi di HP langsung berakhir dan data aplikasi di HP dihapus dari jarak jauh. Data respons yang sudah tersimpan di server tetap ada.
-- **Jika SSO perusahaan tersedia** (pertanyaan terbuka #6): langkah kode aktivasi diganti login dengan akun PT Vale. Admin FES tetap menentukan peran dan regu.
-
-**Alternatif bila anggota belum ada di sistem:** di layar login ada tombol **"Minta akses"**. Anggota mengisi ID karyawan, email pribadi, dan nomor HP, lalu permintaan masuk ke Admin FES untuk disetujui atau ditolak. Tanpa persetujuan, akun tidak bisa dipakai.
+- **Pindah regu/peran:** diubah Admin FES (peran operasional) atau Super Admin (peran admin), langsung berlaku.
+- **Keluar dari FES atau HP hilang:** Super Admin menonaktifkan akun. Sesi di HP berakhir dan data aplikasi di HP dihapus dari jarak jauh; data respons di server tetap ada.
+- **Mengganti email pribadi** wajib dikonfirmasi dengan kata sandi, karena email dipakai untuk Lupa kata sandi dan login dua langkah.
+- **Jika SSO perusahaan tersedia** (pertanyaan terbuka #6): login bisa memakai akun PT Vale; Super Admin tetap menentukan peran.
+- Email pribadi termasuk data pribadi: hanya dipakai untuk keperluan akun, sesuai UU Pelindungan Data Pribadi (UU 27/2022). Email dikirim dari domain resmi dengan SPF/DKIM/DMARC dan hanya berisi kode, tanpa tautan login.
 
 ### 5.12 Halaman Admin (Web)
 
@@ -468,14 +486,15 @@ Email pribadi (misalnya Gmail) hanya dipakai sebagai **saluran pengiriman kode**
 
 | Halaman | Yang bisa dilakukan |
 |---|---|
-| **Ringkasan admin** | Jumlah anggota aktif, aktivasi yang belum selesai, permintaan akses baru, unit yang tidak siap, dan hal yang perlu ditindaklanjuti |
-| **Anggota & akses** | Tambah/impor anggota, kirim ulang kode aktivasi, ubah peran/regu/station, reset perangkat, nonaktifkan akun dan hapus data aplikasi dari HP, menyetujui "Minta akses" |
+| **Dashboard** | Halaman awal setelah login: dashboard respons yang sama dengan versi web/aplikasi. Untuk Admin FES hanya baca (tanpa unduh data) |
+| **Ringkasan admin** | Jumlah anggota aktif, total akun, unit yang tidak siap, pengajuan tukar jaga, dan hal yang perlu ditindaklanjuti |
+| **Anggota & akses** | Melihat semua akun; ubah regu, station, status, dan peran operasional (Tim FES, Team Leader, Koordinator); reset perangkat. **Tambah/impor akun hanya untuk Super Admin** (Admin FES melihat label "Tambah akun: khusus Super Admin IT") |
 | **Regu & jadwal jaga** | Mengatur regu dan jadwal jaga langsung di aplikasi (lihat 5.13). Daftar personel on duty di Dispatch Call terisi otomatis dari jadwal ini |
 | **Unit kendaraan** | Daftar unit (FS R6, FS E8, EMS6, …) dan statusnya: Siap / Sedang respons / Perbaikan. Unit yang sedang perbaikan tidak muncul di pilihan Dispatch |
 | **Master data** | Response station & koordinat, lokasi/area, jenis respons, sub-jenis, incident type, sumber informasi, instansi pendukung (BPBD, Damkar) |
 | **Aturan respons** | Tahapan tambahan per jenis respons, field wajib, batas kirim Preliminary (default 15 menit), jeda mode fokus (default 15 detik) |
 | **Template & penomoran** | Format nomor ERR, template ekspor Excel/PDF untuk Preliminary dan ERR, kop/logo laporan |
-| **Penerima laporan** | Daftar penerima Preliminary dan ERR per jenis respons, serta aturan push notification ke Supervisor |
+| **Penerima laporan** | Daftar penerima Preliminary dan ERR per jenis respons, serta aturan push notification ke Koordinator |
 | **Alur persetujuan** | Siapa yang mereview dan menyetujui ERR, dan eskalasi bila ERR belum direview dalam 24 jam |
 | **Koreksi laporan** | Membuka ERR final untuk revisi. Revisi selalu jadi versi baru dengan alasan tercatat, versi lama tetap tersimpan |
 | **Log audit** | Riwayat login, perubahan data waktu, perubahan master data, unduhan data. Bisa difilter dan diekspor |
@@ -488,6 +507,9 @@ Email pribadi (misalnya Gmail) hanya dipakai sebagai **saluran pengiriman kode**
 | **Integrasi** | SSO perusahaan, **layanan pengiriman email** (domain resmi dengan SPF/DKIM/DMARC) untuk kode aktivasi, OTP, dan pengingat jadwal |
 | **Data & retensi** | Lama penyimpanan arsip, jadwal backup, pemulihan data |
 | **Hak Admin FES** | Menunjuk atau mencabut Admin FES |
+| **Akun pengguna** | Menambah dan mengimpor akun, memberi peran Admin FES / Super Admin, menonaktifkan akun |
+
+**Navigasi halaman admin:** menu samping di desktop (tetap di tempat saat halaman digulir); di HP/tablet lewat tombol **Menu** di bar atas (tanpa menu bawah). Halaman Sistem & keamanan tidak bisa dibuka Admin FES, termasuk lewat alamat langsung.
 
 ### 5.13 Jadwal Jaga (fitur Admin)
 
@@ -520,6 +542,38 @@ Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur 
 - **Off Duty Recall** menampilkan anggota yang sedang tidak jaga beserta nomor kontaknya, supaya mudah dipanggil.
 - Dashboard bisa menampilkan respons per regu dan per shift.
 
+### 5.14 Pengaturan Akun (semua pengguna)
+
+Semua pengguna punya **Pengaturan akun**: di aplikasi lewat foto kecil di ujung kanan bar status; di web lewat foto/nama di bar atas, tombol **Akun** di dashboard, atau menu samping admin.
+
+| Bagian | Isi |
+|---|---|
+| **Foto profil** | Ganti foto (gambar dipotong persegi dan diperkecil; file bukan gambar ditolak; gambar diproses ulang sehingga skrip dan metadata lokasi tidak ikut) atau hapus foto (kembali ke inisial nama) |
+| **Profil** | Nama lengkap, nomor HP (format 08… / +62 8…, 10–13 digit), email pribadi (perlu konfirmasi kata sandi bila diganti), tanggal lahir, golongan darah, alamat, kontak darurat (nama + nomor HP) |
+| **Data kepegawaian** | BN, peran, regu: hanya bisa dilihat; diubah oleh Super Admin IT |
+| **Kata sandi** | Kata sandi saat ini, baru, ulangi; aturan kata sandi (5.11) |
+
+**Pesan kesalahan harus menjelaskan letak salah dan cara memperbaikinya**, misalnya:
+- Kata sandi saat ini salah: dideteksi bila huruf besar/kecil terbalik (Caps Lock) atau ada spasi tambahan; selalu disertai saran ikon mata dan Lupa kata sandi.
+- Kata sandi baru: tiap syarat yang belum terpenuhi disebut ("kurang 3 karakter (sekarang 5, minimal 8)", "belum ada huruf besar", "masih memuat BN Anda").
+- Ulangi kata sandi: "kurang 1 karakter di bagian akhir" atau "mulai berbeda pada karakter ke-8"; petunjuk langsung "✓ Cocok".
+- Kolom salah diberi bingkai merah, kursor pindah ke kolom pertama yang salah, dan ringkasan "Ada 3 kolom yang perlu diperbaiki".
+- Contoh di pesan tidak boleh memakai kata sandi sungguhan atau bawaan.
+
+### 5.15 Halaman Awal & Navigasi per Peran
+
+| Peran | Halaman awal setelah login | Menu yang tersedia |
+|---|---|---|
+| Tim FES | Aplikasi respons: Beranda | Beranda · Respons · Laporan · Jadwal |
+| Team Leader | **Dashboard** | Aplikasi: Beranda · Respons · Laporan · **Dashboard** · Jadwal. Web: Dashboard · Respons darurat |
+| Koordinator FES | **Dashboard** | Hanya dashboard (aplikasi dan web). Layar respons tidak bisa dibuka |
+| Admin FES | **Dashboard** (hanya baca) | Web: Dashboard · Admin. Aplikasi: hanya dashboard |
+| Super Admin | **Dashboard** | Web: Dashboard · Admin. Aplikasi: hanya dashboard |
+
+- Siapa pun yang punya akses dashboard bisa melihatnya **di aplikasi HP** dengan tampilan yang sama seperti web.
+- Saat halaman dimuat (setelah login, berpindah menu, membuka dashboard), tampil **skeleton loading** sesuai bentuk halaman dan **spinner** dengan keterangan "Memuat …".
+- Di web, bar atas berisi logo, menu halaman, foto & nama (membuka Pengaturan akun), dan tombol Keluar.
+
 ---
 
 ## 6. Alur Pengguna (User Flow)
@@ -528,24 +582,24 @@ Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur 
 
 ```mermaid
 flowchart TD
-  A[Admin FES membuat akun<br/>& jadwal jaga] --> B[Anggota aktivasi akun di HP]
+  A[Super Admin membuat akun<br/>Admin FES menyusun jadwal jaga] --> B[Anggota login sekali di HP]
   B --> C[Awal shift: buka aplikasi<br/>status regu siaga]
   C --> D[Panggilan darurat → Dispatch Call<br/>isi lokasi, unit, Target Time]
   D --> E[Start to Scene → Arrival on Scene<br/>GPS, foto, catatan]
   E --> F[Preliminary Report dikirim<br/>≤ 15 menit setelah tiba]
   F --> G[Leave Scene → Return to Stn<br/>Draft ERR otomatis]
   G --> H[Team Leader lengkapi & ajukan ERR]
-  H --> I{Supervisor review}
+  H --> I{Review ERR<br/>usulan: Koordinator}
   I -- Perlu perbaikan --> H
   I -- Setuju --> J[ERR final & terkunci]
   J --> K[Arsip & dashboard<br/>per jenis respons]
 ```
 
-1. **Persiapan (sekali di awal):** Admin FES membuat akun, regu, jadwal jaga, dan master data. Anggota mengaktifkan akun di HP (5.11).
+1. **Persiapan (sekali di awal):** Super Admin membuat akun; Admin FES menyusun regu, jadwal jaga, dan master data. Anggota login sekali di HP dan tetap masuk sampai Keluar (5.11).
 2. **Awal shift:** anggota on duty membuka aplikasi. Beranda menampilkan regu dan station yang siaga.
 3. **Respons:** Team Leader menekan Dispatch Call, lalu tahapan Start → Arrival → Leave → Return (5.1). GPS, foto, dan catatan berjalan di sepanjang respons.
 4. **Pelaporan:** Preliminary dikirim setelah tiba (5.4). Draft ERR dibuat otomatis saat Return to Stn (5.5).
-5. **Persetujuan:** Team Leader mengajukan ERR, Supervisor menyetujui atau mengembalikan untuk diperbaiki.
+5. **Persetujuan:** Team Leader mengajukan ERR, lalu peninjau menyetujui atau mengembalikan untuk diperbaiki. Peninjau pengganti Supervisor belum ditetapkan (usulan: Koordinator, pertanyaan terbuka #22).
 6. **Analisis:** ERR final masuk arsip dan dashboard per jenis respons (5.6).
 
 
@@ -562,7 +616,7 @@ Panggilan darurat masuk (radio/telepon)
         │
         ▼
 [ARRIVAL ON SCENE] ── waktu tiba + Mileage (KM) otomatis + On Scene Time
-        │                └─► Preliminary Report otomatis → notifikasi Supervisor
+        │                └─► Preliminary Report otomatis → notifikasi Koordinator
         ▼
 [Tahapan tambahan & "+ Catatan"] → kronologi bertimestamp
         │      (code red, pemadaman, reposisi, dll.; foto evidence bisa kapan saja)
@@ -577,7 +631,7 @@ Panggilan darurat masuk (radio/telepon)
 
 ```
 ERR Draft → Team Leader melengkapi narasi → Ajukan
-        → Supervisor review/edit → Setujui → ERR Final (terkunci, PDF/Excel)
+        → Koordinator review/edit → Setujui → ERR Final (terkunci, PDF/Excel)
         → Masuk arsip & dashboard
 ```
 
@@ -592,8 +646,8 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Akurasi waktu** | Waktu menggunakan jam server/NTP saat online. Saat offline memakai jam perangkat dan diberi penanda; zona waktu **WITA (UTC+8)** |
 | **Kinerja** | Respons tombol < 300 ms; Preliminary Report terbentuk < 10 detik setelah data lengkap |
 | **Baterai** | Pelacakan GPS selama 1 jam respons menghabiskan < 15% baterai **[ASUMSI target]** |
-| **Keamanan** | Login per pengguna (bukan akun bersama); HTTPS/TLS; data terenkripsi; akses berbasis peran; sesi otomatis berakhir; dukungan SSO perusahaan **[jika tersedia]** |
-| **HP pribadi (BYOD)** | Petugas memakai **HP pribadi**, sehingga: (1) data aplikasi disimpan **terenkripsi di dalam aplikasi**, terpisah dari data pribadi; (2) foto evidence **tidak masuk ke galeri pribadi** dan dihapus dari HP setelah terunggah; (3) GPS **hanya aktif selama respons berjalan**, tanpa pelacakan di luar tugas; (4) Admin bisa **mencabut akses & menghapus data aplikasi dari jarak jauh** jika HP hilang atau anggota pindah tugas; (5) login dengan PIN/biometrik; (6) ukuran aplikasi kecil dan hemat kuota data (foto dikompresi; unggah foto asli bisa diatur hanya via Wi-Fi) |
+| **Keamanan** | Login per pengguna (bukan akun bersama) dengan captcha dan kunci akun; login dua langkah untuk Admin FES & Super Admin; HTTPS/TLS; data terenkripsi; kata sandi di-hash; akses berbasis peran **diperiksa di server**; sesi web berakhir setelah 15 menit tanpa aktivitas; dukungan SSO perusahaan **[jika tersedia]**. Rincian di 7B |
+| **HP pribadi (BYOD)** | Petugas memakai **HP pribadi**, sehingga: (1) data aplikasi disimpan **terenkripsi di dalam aplikasi**, terpisah dari data pribadi; (2) foto evidence **tidak masuk ke galeri pribadi** dan dihapus dari HP setelah terunggah; (3) GPS **hanya aktif selama respons berjalan**, tanpa pelacakan di luar tugas; (4) Admin bisa **mencabut akses & menghapus data aplikasi dari jarak jauh** jika HP hilang atau anggota pindah tugas; (5) login sekali, sesi tersimpan di HP sampai pengguna menekan Keluar (biometrik opsional untuk membuka aplikasi); (6) ukuran aplikasi kecil dan hemat kuota data (foto dikompresi; unggah foto asli bisa diatur hanya via Wi-Fi) |
 | **Integritas data** | Log audit untuk setiap perubahan data waktu dan laporan; laporan final tidak bisa diubah |
 | **Ketersediaan** | Uptime server ≥ 99,5%; backup database harian |
 | **Retensi data** | Arsip disimpan minimal 5 tahun **[ASUMSI, sesuaikan dengan kebijakan perusahaan]** |
@@ -617,6 +671,37 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Prinsip: Simplicity** | Satu layar, satu tugas utama. Hanya informasi yang dibutuhkan saat itu yang tampil (misalnya kronologi terbaru cukup 2 entri, lengkapnya di "Lihat semua"). Pilihan tambahan disimpan di lembar/menu (Catatan, Opsi) dan tidak ditampilkan dobel. Latar dibuat tenang. |
 | **Prinsip: Consistency** | Skala yang sama dipakai di mobile dan web: radius 12 px (kontrol), 18 px (kartu), 22 px (tombol aksi), dan bentuk pill untuk status. Jarak antar elemen 16 px, padding kartu 16 px. Gaya label, ikon garis, warna fungsi (kuning = isian tim, biru = hitungan sistem), dan perilaku notifikasi sama di semua layar. |
 | **Animasi** | Fade in/fade out untuk perpindahan layar, lembar (sheet), notifikasi, dan mode fokus. Durasi 0,15–0,7 detik dengan kurva halus. Dimatikan otomatis bila pengaturan HP mengurangi gerakan. |
+| **Layar pembuka** | Setiap aplikasi/web dibuka: logo FES muncul dari samar ke tajam di latar navy, dua lingkaran cahaya memancar, nama aplikasi naik perlahan dengan garis loading, lalu memudar (±2 detik, bisa diketuk untuk melewati). |
+| **Halaman masuk** | Latar gelap hampir hitam dengan pendar api kecil dan bara melayang di bagian bawah; logo dan nama di tengah atas; kartu login kaca gelap di tengah (melebar di layar lebar, satu kolom di HP); seberkas cahaya api mengelilingi tepi kartu saat halaman dibuka; tombol menyala dan terangkat saat disentuh pointer. |
+| **Loading** | Skeleton loading berkilau sesuai bentuk halaman + spinner merah-jingga dengan keterangan "Memuat …"; tampil minimal ±0,6 detik supaya tidak berkedip. |
+| **Hak cipta** | "© 2026 Leoghynizm" di kaki setiap halaman, di bagian bawah layar aplikasi, dan di layar pembuka. |
+
+## 7B. Keamanan & Hasil Uji
+
+**Uji keamanan prototipe (12 November 2026)** — 13 skenario pada aplikasi HP dan web. Uji pertama menemukan 3 celah; semuanya diperbaiki dan uji ulang 13/13 aman.
+
+| Area | Skenario | Hasil |
+|---|---|---|
+| Sisipan kode (XSS) | Kode berbahaya di kolom ID, Lupa kata sandi, Pengaturan akun, semua isian aplikasi (lokasi, detail, Preliminary, catatan, personel, alasan izin), pengajuan dari HP yang tampil di admin, pencarian/tambah akun/ubah email di admin | Aman (semua isian di-*escape*) |
+| Unggah file | Foto profil SVG berisi skrip; file bukan gambar | Aman (gambar diproses ulang; non-gambar ditolak) |
+| Login | Tanpa captcha yang benar; pesan "login berhasil" palsu dari bingkai lain | Aman |
+| Hak akses | Admin FES membuka Sistem & keamanan lewat alamat | Aman |
+| Hak akses | Mengubah peran di data sesi HP | **Celah → diperbaiki:** sesi hanya menyimpan ID + tanda tangan; peran selalu dari daftar akun |
+| Login dua langkah | Memalsukan tanda "perangkat tepercaya" | **Celah → diperbaiki:** tanda ditandatangani |
+| Data sensitif | Kata sandi terlihat di kode halaman | **Celah → diperbaiki:** disimpan sebagai hash SHA-256 bergaram |
+
+Audit alur sebelumnya juga memperbaiki: Admin FES bisa memberi peran Admin/Super Admin; kunci akun berlaku untuk semua akun di perangkat; akun tetap terkunci setelah reset kata sandi; kode verifikasi bisa ditebak tanpa batas; email bisa diganti tanpa konfirmasi; sesi web tidak pernah berakhir.
+
+**Wajib di versi produksi (server)**
+1. Login, peran, dan hak akses **diperiksa di server** untuk setiap permintaan, bukan hanya di tampilan.
+2. Kata sandi di-hash dengan **bcrypt/argon2**; tidak pernah disimpan atau dikirim dalam bentuk asli.
+3. **Token sesi** yang bisa dicabut (keluar dari semua perangkat setelah ganti kata sandi atau akun dinonaktifkan).
+4. **Captcha dari server** (misalnya Cloudflare Turnstile) dan batas percobaan per akun dan per IP.
+5. Kode verifikasi dikirim lewat **email sungguhan**, tidak pernah ditampilkan di layar.
+6. **Log audit:** login, gagal login, ganti kata sandi, ganti peran, tambah/nonaktif akun, ekspor data.
+7. **HTTPS** di semua koneksi; pesan antar-halaman memakai origin yang ditentukan.
+8. Lupa kata sandi **tidak memberi tahu** apakah ID terdaftar.
+9. Data pribadi (biodata, foto, email, nomor HP) disimpan di server, bukan di browser; tautan prototipe yang memuat data anggota sungguhan hanya dibagikan ke pihak berwenang.
 
 ## 8. Model Data (Garis Besar)
 
@@ -776,9 +861,13 @@ gantt
 
 **Akun & admin:**
 
-19. Siapa yang ditunjuk sebagai **Admin FES** (usulan: Koordinator/Superintendent FES + 1 cadangan) dan **Super Admin** (usulan: tim IT PT Vale)? **Status:** nama belum ditentukan. Penunjukan menjadi tugas Fase 0, sebelum Sprint 1 dimulai.
+19. ~~Siapa Admin FES dan Super Admin~~ **Terjawab:** Admin FES = Okky Nurhamni Muda; Super Admin (IT) = Eghy Agus Rinaldi; Koordinator FES = Deri Nurjaya Putra.
 20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** email pribadi anggota (lihat 5.11).
 21. ~~Jadwal jaga dalam bentuk file~~ **Terjawab:** belum ada. Jadwal dibuat dan diatur lewat fitur admin (lihat 5.13).
+22. Setelah peran Supervisor dihapus, **siapa yang menyetujui ERR**? Usulan: Koordinator FES lewat web.
+23. **Pembagian regu** 16 anggota FES Pomalaa (saat ini contoh: 1 Team Leader + 3 anggota per regu) perlu dikonfirmasi.
+24. **BN dan email pribadi** Koordinator dan Admin FES belum tersedia (prototipe memakai nilai contoh).
+25. Apakah batas **15 menit tanpa aktivitas** untuk web sudah sesuai?
 
 ---
 
@@ -798,5 +887,10 @@ gantt
 | **Triase (Green/Yellow/Red/Black)** | Kategori kondisi korban dari ringan sampai meninggal |
 | **BPBD** | Badan Penanggulangan Bencana Daerah |
 | **Overhaul** | Tahap pendinginan dan pemeriksaan sisa api setelah padam |
+| **BN** | Nomor karyawan (huruf C + 6 angka), dipakai sebagai ID login |
+| **Login dua langkah** | Masuk dengan kata sandi + kode 6 digit dari email pribadi |
+| **Perangkat tepercaya** | Perangkat yang dipilih pengguna agar kode dua langkah tidak diminta lagi selama 30 hari |
+| **Hash kata sandi** | Hasil olahan satu arah dari kata sandi; kata sandi asli tidak bisa dibaca dari hash |
+| **XSS** | Serangan dengan menyisipkan kode ke isian supaya dijalankan di halaman orang lain |
 | **Offline-first** | Aplikasi tetap berfungsi tanpa internet dan menyinkronkan data saat online |
 | **MVP** | Minimum Viable Product: versi pertama dengan fitur inti |
