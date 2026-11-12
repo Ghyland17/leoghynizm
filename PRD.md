@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.5 (Draft – peran & akses baru, login & keamanan, pengaturan akun) |
+| Versi dokumen | 1.6 (Draft – regu Alpha/Bravo/Charlie/Beta, 3 shift, jam kerja individu) |
 | Tanggal | 12 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -81,7 +81,7 @@ Peran **Supervisor** dan **Viewer** dari versi sebelumnya **dihapus**. Pemantaua
 
 Akun yang tidak punya akses ke suatu halaman tetap di halaman masuk dan mendapat pesan yang jelas, misalnya "Dashboard hanya untuk Team Leader, Koordinator, Admin FES, dan Super Admin". Penolakan karena peran tidak dihitung sebagai salah kata sandi.
 
-**Data awal pengguna:** 16 anggota FES Pomalaa dari daftar resmi (nama + BN), terdiri dari 4 Team Leader dan 12 Tim FES, ditambah akun Koordinator, Admin FES, dan Super Admin. Data diimpor oleh Super Admin. Pembagian regu masih perlu dikonfirmasi (pertanyaan terbuka #23).
+**Data awal pengguna:** 16 anggota FES Pomalaa dari daftar resmi (nama + BN), terdiri dari 4 Team Leader dan 12 Tim FES, dibagi ke **4 regu: Alpha, Bravo, Charlie, dan Beta** (masing-masing 1 Team Leader + 3 anggota; susunan anggota per regu bisa diubah Admin FES). Ditambah akun Koordinator, Admin FES, dan Super Admin. Data diimpor oleh Super Admin.
 
 ### 3.2 Persona
 
@@ -466,7 +466,7 @@ Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode 
 | Tempat | Aturan |
 |---|---|
 | **Aplikasi HP** | **Cukup login sekali.** Aplikasi langsung terbuka setiap kali dipakai sampai pengguna menekan **Keluar**. Sesi juga berakhir bila kata sandi diganti di perangkat lain atau akun dinonaktifkan Super Admin |
-| **Web** | Keluar otomatis setelah **15 menit tanpa aktivitas**, dengan peringatan 1 menit sebelumnya ("Tetap masuk" / "Keluar sekarang"), karena web sering dibuka di komputer kantor bersama |
+| **Web** | Keluar otomatis setelah **1 jam tanpa aktivitas**, dengan peringatan 1 menit sebelumnya ("Tetap masuk" / "Keluar sekarang"), karena web sering dibuka di komputer kantor bersama |
 
 **Aturan kata sandi**
 - Minimal 8 karakter, ada huruf dan angka, ada huruf besar, tidak memuat BN, dan berbeda dari kata sandi lama.
@@ -516,9 +516,10 @@ Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode 
 Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur langsung di halaman admin. Jadwal ini menjadi sumber daftar **personel on duty** di Dispatch Call, sehingga Team Leader tidak perlu memilih personel satu per satu.
 
 **Pengaturan dasar (sekali di awal)**
-- **Regu:** nama regu (misalnya Regu A–D), Team Leader, dan anggota tetap.
-- **Pola shift:** jam mulai dan selesai tiap shift (misalnya Pagi 07:00–19:00, Malam 19:00–07:00), bisa disesuaikan per station.
-- **Pola rotasi:** urutan regu per hari (misalnya A-B-C-D berulang). Pola ini dipakai untuk mengisi jadwal otomatis.
+- **Regu:** 4 regu, yaitu **Alpha, Bravo, Charlie, dan Beta**, masing-masing dengan Team Leader dan anggota tetap.
+- **Pola shift:** default **3 shift per hari** (Pagi 07:00–15:00, Sore 15:00–23:00, Malam 23:00–07:00). Admin FES bisa **mengubah nama, jam mulai, dan jam selesai** tiap shift, serta **menambah atau menghapus shift** (1–4 shift per hari). Sistem memberi peringatan bila ada jam yang tidak tertutup shift atau tumpang tindih antar shift.
+- **Jam kerja individu:** Admin FES bisa mengatur jam kerja **per anggota**: "Ikut shift regu" (default) atau "Jam khusus" dengan jam mulai, jam selesai (boleh lewat tengah malam), hari kerja (Sen–Min), dan keterangan (misalnya staf station). Anggota dengan jam khusus tidak ikut rotasi regu dan dihitung on duty pada shift yang bersinggungan dengan jam kerjanya.
+- **Pola rotasi:** urutan regu Alpha → Bravo → Charlie → Beta. Setiap hari 3 regu jaga di 3 shift dan 1 regu libur, lalu bergeser satu langkah keesokan harinya. Urutan bisa digeser Admin FES. Pola ini dipakai untuk mengisi jadwal otomatis.
 - **Kebutuhan minimum:** jumlah personel minimum per shift per station dan per unit (misalnya FS R6 minimal 4 orang, EMS6 minimal 1 nurse).
 
 **Membuat & mengubah jadwal**
@@ -589,7 +590,7 @@ flowchart TD
   E --> F[Preliminary Report dikirim<br/>≤ 15 menit setelah tiba]
   F --> G[Leave Scene → Return to Stn<br/>Draft ERR otomatis]
   G --> H[Team Leader lengkapi & ajukan ERR]
-  H --> I{Review ERR<br/>usulan: Koordinator}
+  H --> I{Koordinator review}
   I -- Perlu perbaikan --> H
   I -- Setuju --> J[ERR final & terkunci]
   J --> K[Arsip & dashboard<br/>per jenis respons]
@@ -599,7 +600,7 @@ flowchart TD
 2. **Awal shift:** anggota on duty membuka aplikasi. Beranda menampilkan regu dan station yang siaga.
 3. **Respons:** Team Leader menekan Dispatch Call, lalu tahapan Start → Arrival → Leave → Return (5.1). GPS, foto, dan catatan berjalan di sepanjang respons.
 4. **Pelaporan:** Preliminary dikirim setelah tiba (5.4). Draft ERR dibuat otomatis saat Return to Stn (5.5).
-5. **Persetujuan:** Team Leader mengajukan ERR, lalu peninjau menyetujui atau mengembalikan untuk diperbaiki. Peninjau pengganti Supervisor belum ditetapkan (usulan: Koordinator, pertanyaan terbuka #22).
+5. **Persetujuan:** Team Leader mengajukan ERR, **Koordinator FES** menyetujui atau mengembalikan untuk diperbaiki (lewat web).
 6. **Analisis:** ERR final masuk arsip dan dashboard per jenis respons (5.6).
 
 
@@ -646,7 +647,7 @@ ERR Draft → Team Leader melengkapi narasi → Ajukan
 | **Akurasi waktu** | Waktu menggunakan jam server/NTP saat online. Saat offline memakai jam perangkat dan diberi penanda; zona waktu **WITA (UTC+8)** |
 | **Kinerja** | Respons tombol < 300 ms; Preliminary Report terbentuk < 10 detik setelah data lengkap |
 | **Baterai** | Pelacakan GPS selama 1 jam respons menghabiskan < 15% baterai **[ASUMSI target]** |
-| **Keamanan** | Login per pengguna (bukan akun bersama) dengan captcha dan kunci akun; login dua langkah untuk Admin FES & Super Admin; HTTPS/TLS; data terenkripsi; kata sandi di-hash; akses berbasis peran **diperiksa di server**; sesi web berakhir setelah 15 menit tanpa aktivitas; dukungan SSO perusahaan **[jika tersedia]**. Rincian di 7B |
+| **Keamanan** | Login per pengguna (bukan akun bersama) dengan captcha dan kunci akun; login dua langkah untuk Admin FES & Super Admin; HTTPS/TLS; data terenkripsi; kata sandi di-hash; akses berbasis peran **diperiksa di server**; sesi web berakhir setelah 1 jam tanpa aktivitas; dukungan SSO perusahaan **[jika tersedia]**. Rincian di 7B |
 | **HP pribadi (BYOD)** | Petugas memakai **HP pribadi**, sehingga: (1) data aplikasi disimpan **terenkripsi di dalam aplikasi**, terpisah dari data pribadi; (2) foto evidence **tidak masuk ke galeri pribadi** dan dihapus dari HP setelah terunggah; (3) GPS **hanya aktif selama respons berjalan**, tanpa pelacakan di luar tugas; (4) Admin bisa **mencabut akses & menghapus data aplikasi dari jarak jauh** jika HP hilang atau anggota pindah tugas; (5) login sekali, sesi tersimpan di HP sampai pengguna menekan Keluar (biometrik opsional untuk membuka aplikasi); (6) ukuran aplikasi kecil dan hemat kuota data (foto dikompresi; unggah foto asli bisa diatur hanya via Wi-Fi) |
 | **Integritas data** | Log audit untuk setiap perubahan data waktu dan laporan; laporan final tidak bisa diubah |
 | **Ketersediaan** | Uptime server ≥ 99,5%; backup database harian |
@@ -864,10 +865,10 @@ gantt
 19. ~~Siapa Admin FES dan Super Admin~~ **Terjawab:** Admin FES = Okky Nurhamni Muda; Super Admin (IT) = Eghy Agus Rinaldi; Koordinator FES = Deri Nurjaya Putra.
 20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** email pribadi anggota (lihat 5.11).
 21. ~~Jadwal jaga dalam bentuk file~~ **Terjawab:** belum ada. Jadwal dibuat dan diatur lewat fitur admin (lihat 5.13).
-22. Setelah peran Supervisor dihapus, **siapa yang menyetujui ERR**? Usulan: Koordinator FES lewat web.
-23. **Pembagian regu** 16 anggota FES Pomalaa (saat ini contoh: 1 Team Leader + 3 anggota per regu) perlu dikonfirmasi.
-24. **BN dan email pribadi** Koordinator dan Admin FES belum tersedia (prototipe memakai nilai contoh).
-25. Apakah batas **15 menit tanpa aktivitas** untuk web sudah sesuai?
+22. ~~Penyetuju ERR~~ **Terjawab:** Koordinator FES menyetujui ERR.
+23. ~~Pembagian regu & shift~~ **Terjawab:** 4 regu (Alpha, Bravo, Charlie, Beta), 3 shift per hari; Admin FES mengatur jam kerja per anggota serta jadwal dan jam shift (5.13).
+24. ~~BN & email Koordinator/Admin FES~~ **Terjawab:** dibuat dengan nilai sementara. Email pribadi bisa diganti sendiri di Pengaturan akun; BN diganti oleh Super Admin.
+25. ~~Batas sesi web~~ **Terjawab:** keluar otomatis setelah **1 jam** tanpa aktivitas.
 
 ---
 
