@@ -7,7 +7,7 @@
 | Pemilik produk | Fire Emergency & Service (FES) – PT Vale Indonesia |
 | Platform | Mobile (Android/iOS) + Web Dashboard |
 | Lokasi penggunaan | Kolaka, Sulawesi Tenggara |
-| Versi dokumen | 1.6 (Draft – regu Alpha/Bravo/Charlie/Beta, 3 shift, jam kerja individu) |
+| Versi dokumen | 1.6 (Draft – regu Alpha/Bravo/Charlie/Delta, 3 shift, jam kerja individu) |
 | Tanggal | 12 November 2026 |
 | Status | Draft – menunggu review tim FES |
 
@@ -81,7 +81,7 @@ Peran **Supervisor** dan **Viewer** dari versi sebelumnya **dihapus**. Pemantaua
 
 Akun yang tidak punya akses ke suatu halaman tetap di halaman masuk dan mendapat pesan yang jelas, misalnya "Dashboard hanya untuk Team Leader, Koordinator, Admin FES, dan Super Admin". Penolakan karena peran tidak dihitung sebagai salah kata sandi.
 
-**Data awal pengguna:** 16 anggota FES Pomalaa dari daftar resmi (nama + BN), terdiri dari 4 Team Leader dan 12 Tim FES, dibagi ke **4 regu: Alpha, Bravo, Charlie, dan Beta** (masing-masing 1 Team Leader + 3 anggota; susunan anggota per regu bisa diubah Admin FES). Ditambah akun Koordinator, Admin FES, dan Super Admin. Data diimpor oleh Super Admin.
+**Data awal pengguna:** 16 anggota FES Pomalaa dari daftar resmi (nama + BN), terdiri dari 4 Team Leader dan 12 Tim FES, dibagi ke **4 regu: Alpha, Bravo, Charlie, dan Delta** (masing-masing 1 Team Leader + 3 anggota; susunan anggota per regu bisa diubah Admin FES). Ditambah akun Koordinator, Admin FES, dan Super Admin. Data diimpor oleh Super Admin.
 
 ### 3.2 Persona
 
@@ -516,10 +516,10 @@ Saat respons berjalan dan HP tidak disentuh, layar otomatis berpindah ke **mode 
 Saat ini belum ada jadwal jaga dalam bentuk file, jadi jadwal dibuat dan diatur langsung di halaman admin. Jadwal ini menjadi sumber daftar **personel on duty** di Dispatch Call, sehingga Team Leader tidak perlu memilih personel satu per satu.
 
 **Pengaturan dasar (sekali di awal)**
-- **Regu:** 4 regu, yaitu **Alpha, Bravo, Charlie, dan Beta**, masing-masing dengan Team Leader dan anggota tetap.
+- **Regu:** 4 regu, yaitu **Alpha, Bravo, Charlie, dan Delta**, masing-masing dengan Team Leader dan anggota tetap.
 - **Pola shift:** default **3 shift per hari** (Pagi 07:00–15:00, Sore 15:00–23:00, Malam 23:00–07:00). Admin FES bisa **mengubah nama, jam mulai, dan jam selesai** tiap shift, serta **menambah atau menghapus shift** (1–4 shift per hari). Sistem memberi peringatan bila ada jam yang tidak tertutup shift atau tumpang tindih antar shift.
 - **Jam kerja individu:** Admin FES bisa mengatur jam kerja **per anggota**: "Ikut shift regu" (default) atau "Jam khusus" dengan jam mulai, jam selesai (boleh lewat tengah malam), hari kerja (Sen–Min), dan keterangan (misalnya staf station). Anggota dengan jam khusus tidak ikut rotasi regu dan dihitung on duty pada shift yang bersinggungan dengan jam kerjanya.
-- **Pola rotasi:** urutan regu Alpha → Bravo → Charlie → Beta. Setiap hari 3 regu jaga di 3 shift dan 1 regu libur, lalu bergeser satu langkah keesokan harinya. Urutan bisa digeser Admin FES. Pola ini dipakai untuk mengisi jadwal otomatis.
+- **Pola rotasi:** urutan regu Alpha → Bravo → Charlie → Delta. Setiap hari 3 regu jaga di 3 shift dan 1 regu libur, lalu bergeser satu langkah keesokan harinya. Urutan bisa digeser Admin FES. Pola ini dipakai untuk mengisi jadwal otomatis.
 - **Kebutuhan minimum:** jumlah personel minimum per shift per station dan per unit (misalnya FS R6 minimal 4 orang, EMS6 minimal 1 nurse).
 
 **Membuat & mengubah jadwal**
@@ -866,7 +866,7 @@ gantt
 20. ~~Saluran kode aktivasi & OTP~~ **Terjawab:** email pribadi anggota (lihat 5.11).
 21. ~~Jadwal jaga dalam bentuk file~~ **Terjawab:** belum ada. Jadwal dibuat dan diatur lewat fitur admin (lihat 5.13).
 22. ~~Penyetuju ERR~~ **Terjawab:** Koordinator FES menyetujui ERR.
-23. ~~Pembagian regu & shift~~ **Terjawab:** 4 regu (Alpha, Bravo, Charlie, Beta), 3 shift per hari; Admin FES mengatur jam kerja per anggota serta jadwal dan jam shift (5.13).
+23. ~~Pembagian regu & shift~~ **Terjawab:** 4 regu (Alpha, Bravo, Charlie, Delta), 3 shift per hari; Admin FES mengatur jam kerja per anggota serta jadwal dan jam shift (5.13).
 24. ~~BN & email Koordinator/Admin FES~~ **Terjawab:** dibuat dengan nilai sementara. Email pribadi bisa diganti sendiri di Pengaturan akun; BN diganti oleh Super Admin.
 25. ~~Batas sesi web~~ **Terjawab:** keluar otomatis setelah **1 jam** tanpa aktivitas.
 
