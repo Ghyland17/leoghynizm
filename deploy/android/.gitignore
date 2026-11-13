@@ -1,0 +1,7 @@
+build/
+.gradle/
+local.properties
+*.jks
+keystore.properties
+app/src/main/assets/www/*
+!app/src/main/assets/www/BACA.txt
